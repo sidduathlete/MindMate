@@ -10,16 +10,14 @@ import { FloatingSpheres } from './three/FloatingSpheres';
 import { generateAffirmation } from '../lib/gemini';
 
 const MOOD_OPTIONS = [
-  { label: 'Excellent', score: 10, emoji: '😄', color: '#22c55e', description: 'Feeling great and energized' },
-  { label: 'Happy', score: 9, emoji: '😊', color: '#4ade80', description: 'Content and positive' },
-  { label: 'Good', score: 8, emoji: '😌', color: '#10b981', description: 'Comfortable and stable' },
-  { label: 'Calm', score: 7, emoji: '😐', color: '#14b8a6', description: 'Peaceful and relaxed' },
-  { label: 'Okay', score: 6, emoji: '🙂', color: '#06b6d4', description: 'Neutral, neither good nor bad' },
-  { label: 'Meh', score: 5, emoji: '😕', color: '#84cc16', description: 'Slightly off but manageable' },
-  { label: 'Anxious', score: 4, emoji: '😰', color: '#f59e0b', description: 'Worried or nervous' },
-  { label: 'Sad', score: 3, emoji: '😢', color: '#f97316', description: 'Feeling down' },
-  { label: 'Stressed', score: 2, emoji: '😫', color: '#ef4444', description: 'Overwhelmed' },
-  { label: 'Very Low', score: 1, emoji: '😔', color: '#dc2626', description: 'Struggling significantly' },
+  { label: 'Happy', score: 10, emoji: '😊', color: '#4ade80' },
+  { label: 'Content', score: 8, emoji: '😌', color: '#10b981' },
+  { label: 'Calm', score: 7, emoji: '😐', color: '#14b8a6' },
+  { label: 'Okay', score: 5, emoji: '🙂', color: '#06b6d4' },
+  { label: 'Anxious', score: 4, emoji: '😰', color: '#f59e0b' },
+  { label: 'Sad', score: 3, emoji: '😢', color: '#f97316' },
+  { label: 'Stressed', score: 2, emoji: '😫', color: '#ef4444' },
+  { label: 'Very Low', score: 1, emoji: '😔', color: '#dc2626' },
 ];
 
 export function MoodTracker() {
@@ -28,17 +26,10 @@ export function MoodTracker() {
   const [stressLevel, setStressLevel] = useState(5);
   const [notes, setNotes] = useState('');
   const [triggers, setTriggers] = useState('');
-  const [activities, setActivities] = useState<string[]>([]);
   const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([]);
   const [affirmation, setAffirmation] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [viewMode, setViewMode] = useState<'list' | 'chart'>('list');
   const { user } = useAuth();
-
-  const ACTIVITY_OPTIONS = [
-    'Exercise', 'Sleep', 'Work', 'Social', 'Meditation', 'Eating',
-    'Hobbies', 'Screen Time', 'Nature', 'Self-care'
-  ];
 
   useEffect(() => {
     if (user) {
@@ -182,7 +173,7 @@ export function MoodTracker() {
             >
               <h3 className="text-2xl font-bold text-white mb-6">How are you feeling?</h3>
 
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 {MOOD_OPTIONS.map((mood) => (
                   <motion.button
                     key={mood.label}
@@ -196,8 +187,7 @@ export function MoodTracker() {
                     whileTap={{ scale: 0.95 }}
                   >
                     <div className="text-4xl mb-2">{mood.emoji}</div>
-                    <p className="text-white font-medium text-sm">{mood.label}</p>
-                    <p className="text-gray-400 text-xs mt-1">{mood.description}</p>
+                    <p className="text-white font-medium">{mood.label}</p>
                   </motion.button>
                 ))}
               </div>
@@ -239,32 +229,6 @@ export function MoodTracker() {
                 </div>
 
                 <div>
-                  <label className="block text-gray-300 mb-2">Activities (select all that apply)</label>
-                  <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
-                    {ACTIVITY_OPTIONS.map((activity) => (
-                      <button
-                        key={activity}
-                        type="button"
-                        onClick={() => {
-                          setActivities(prev =>
-                            prev.includes(activity)
-                              ? prev.filter(a => a !== activity)
-                              : [...prev, activity]
-                          );
-                        }}
-                        className={`px-3 py-2 rounded-lg text-sm transition-all ${
-                          activities.includes(activity)
-                            ? 'bg-teal-500 text-white'
-                            : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
-                        }`}
-                      >
-                        {activity}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
                   <label className="block text-gray-300 mb-2">Triggers (comma-separated)</label>
                   <input
                     type="text"
@@ -295,54 +259,7 @@ export function MoodTracker() {
           )}
 
           <div className="mt-12">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-white">Mood History</h3>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-4 py-2 rounded-lg transition-all ${
-                    viewMode === 'list'
-                      ? 'bg-teal-500 text-white'
-                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  List
-                </button>
-                <button
-                  onClick={() => setViewMode('chart')}
-                  className={`px-4 py-2 rounded-lg transition-all ${
-                    viewMode === 'chart'
-                      ? 'bg-teal-500 text-white'
-                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  Chart
-                </button>
-              </div>
-            </div>
-
-            {viewMode === 'chart' && moodHistory.length > 0 && (
-              <Card3D>
-                <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-xl p-6 mb-6">
-                  <h4 className="text-lg font-bold text-white mb-4">7-Day Mood Trend</h4>
-                  <div className="h-48 flex items-end space-x-2">
-                    {moodHistory.slice(0, 7).reverse().map((entry, i) => (
-                      <div key={entry.id} className="flex-1 flex flex-col items-center">
-                        <div
-                          className="w-full bg-gradient-to-t from-teal-500 to-green-400 rounded-t-lg transition-all hover:opacity-80"
-                          style={{ height: `${(entry.mood_score / 10) * 100}%` }}
-                        />
-                        <p className="text-xs text-gray-400 mt-2">
-                          {new Date(entry.created_at).toLocaleDateString('en-US', { weekday: 'short' })}
-                        </p>
-                        <p className="text-xs font-bold text-white">{entry.mood_score}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </Card3D>
-            )}
-
+            <h3 className="text-2xl font-bold text-white mb-6">Recent Entries</h3>
             <div className="space-y-4">
               {moodHistory.slice(0, 5).map((entry) => (
                 <Card3D key={entry.id}>

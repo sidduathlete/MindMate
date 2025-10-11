@@ -1,10 +1,7 @@
 import { useState } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import { Heart, Mail, Lock, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { SolarSystem } from './three/SolarSystem';
 
 interface AuthFormProps {
   onSuccess: () => void;
@@ -48,17 +45,9 @@ export function AuthForm({ onSuccess, onBack }: AuthFormProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-teal-900 flex items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <Canvas>
-          <PerspectiveCamera makeDefault position={[0, 0, 20]} />
-          <SolarSystem />
-          <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.3} />
-        </Canvas>
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-teal-900 flex items-center justify-center p-6">
       <motion.div
-        className="w-full max-w-md relative z-10"
+        className="w-full max-w-md"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
@@ -73,7 +62,7 @@ export function AuthForm({ onSuccess, onBack }: AuthFormProps) {
 
           <div className="flex items-center justify-center mb-8">
             <Heart className="w-10 h-10 text-teal-400 mr-3" />
-            <h1 className="text-3xl font-bold text-white">MindMate</h1>
+            <h1 className="text-3xl font-bold text-white">MindfulCompanion</h1>
           </div>
 
           <h2 className="text-2xl font-bold text-white text-center mb-6">
