@@ -1,8 +1,6 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { ParticleSystem } from './three/ParticleSystem';
-import { WaveBackground } from './three/WaveBackground';
-import { FloatingSpheres } from './three/FloatingSpheres';
 import { motion } from 'framer-motion';
 import { Heart, MessageCircle, BookOpen, Brain } from 'lucide-react';
 import { Card3D } from './Card3D';
@@ -19,10 +17,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           <PerspectiveCamera makeDefault position={[0, 0, 5]} />
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} />
-          <pointLight position={[-10, -10, -10]} intensity={0.5} color="#14b8a6" />
-          <ParticleSystem count={2000} color="#4ade80" size={0.03} speed={0.3} />
-          <WaveBackground color="#14b8a6" opacity={0.2} />
-          <FloatingSpheres count={10} moodScore={8} />
+          <ParticleSystem count={1500} color="#4ade80" size={0.03} speed={0.3} />
           <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
         </Canvas>
       </div>
@@ -36,7 +31,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
         >
           <div className="flex items-center space-x-2">
             <Heart className="w-8 h-8 text-teal-400" />
-            <span className="text-2xl font-bold text-white">MindMate</span>
+            <span className="text-2xl font-bold text-white">MindfulCompanion</span>
           </div>
           <button
             onClick={onGetStarted}
