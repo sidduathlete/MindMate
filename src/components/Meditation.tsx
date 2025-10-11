@@ -8,7 +8,6 @@ import { supabase } from '../lib/supabase';
 import { generateMeditationScript } from '../lib/gemini';
 import { WaveBackground } from './three/WaveBackground';
 import { ParticleSystem } from './three/ParticleSystem';
-import { BreathingFlower } from './three/BreathingFlower';
 
 const MEDITATION_TYPES = [
   {
@@ -50,10 +49,7 @@ export function Meditation() {
   const [moodBefore, setMoodBefore] = useState<number | null>(null);
   const [moodAfter, setMoodAfter] = useState<number | null>(null);
   const [showMoodCheck, setShowMoodCheck] = useState<'before' | 'after' | null>(null);
-  const [isInhale, setIsInhale] = useState(true);
-  const [breathCycle, setBreathCycle] = useState(0);
   const intervalRef = useRef<number | null>(null);
-  const breathIntervalRef = useRef<number | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -67,26 +63,15 @@ export function Meditation() {
           return prev - 1;
         });
       }, 1000);
-
-      breathIntervalRef.current = window.setInterval(() => {
-        setBreathCycle((prev) => prev + 1);
-        setIsInhale((prev) => !prev);
-      }, 4000);
     } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
-      }
-      if (breathIntervalRef.current) {
-        clearInterval(breathIntervalRef.current);
       }
     }
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
-      }
-      if (breathIntervalRef.current) {
-        clearInterval(breathIntervalRef.current);
       }
     };
   }, [isActive, timeRemaining]);
@@ -153,14 +138,12 @@ export function Meditation() {
     <div className="h-full relative overflow-hidden">
       <div className="absolute inset-0 z-0">
         <Canvas>
-          <PerspectiveCamera makeDefault position={[0, 0, 5]} />
-          <ambientLight intensity={0.4} />
-          <pointLight position={[10, 10, 10]} intensity={0.6} />
-          <pointLight position={[-10, -10, -10]} intensity={0.3} color="#60a5fa" />
-          {isActive && <BreathingFlower isInhale={isInhale} duration={4} />}
+          <PerspectiveCamera makeDefault position={[0, 2, 5]} />
+          <ambientLight intensity={0.3} />
+          <pointLight position={[10, 10, 10]} intensity={0.5} />
           <WaveBackground color={selectedType.color} opacity={0.3} />
           <ParticleSystem count={1000} color={selectedType.color} size={0.02} speed={0.2} />
-          <OrbitControls enableZoom={false} enablePan={false} autoRotate={!isActive} autoRotateSpeed={0.2} />
+          <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.2} />
         </Canvas>
       </div>
 
@@ -231,10 +214,6 @@ export function Meditation() {
               animate={{ opacity: 1 }}
             >
               <h3 className="text-3xl font-bold text-white mb-4">{selectedType.name}</h3>
-
-              <div className="text-2xl font-semibold text-teal-400 mb-4">
-                {isInhale ? 'Breathe In...' : 'Breathe Out...'}
-              </div>
 
               <div className="relative w-64 h-64 mx-auto mb-8">
                 <svg className="transform -rotate-90 w-64 h-64">
