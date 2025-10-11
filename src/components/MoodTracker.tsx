@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion } from 'framer-motion';
-import { Smile, Frown, Meh, TrendingUp, Calendar } from 'lucide-react';
+import { Smile, Frown, Meh, TrendingUp, Calendar, BarChart3, Activity, Zap, Brain } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, MoodEntry } from '../lib/supabase';
 import { Card3D } from './Card3D';
@@ -29,6 +29,8 @@ export function MoodTracker() {
   const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([]);
   const [affirmation, setAffirmation] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [activities, setActivities] = useState<string[]>([]);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -68,6 +70,7 @@ export function MoodTracker() {
       stress_level: stressLevel,
       notes,
       triggers: triggerArray,
+      activities,
     });
 
     if (!error) {
@@ -87,6 +90,46 @@ export function MoodTracker() {
             Math.min(moodHistory.length, 7)
         )
       : 5;
+
+  const getMoodTrend = () => {
+    if (moodHistory.length < 2) return 'stable';
+    const recent = moodHistory.slice(0, 3).reduce((sum, e) => sum + e.mood_score, 0) / Math.min(3, moodHistory.length);
+    const older = moodHistory.slice(3, 6).reduce((sum, e) => sum + e.mood_score, 0) / Math.max(1, Math.min(3, moodHistory.length - 3));
+    if (recent > older + 1) return 'improving';
+    if (recent < older - 1) return 'declining';
+    return 'stable';
+  };
+
+  const getCommonTriggers = () => {
+    const allTriggers = moodHistory.flatMap(e => e.triggers);
+    const triggerCounts = allTriggers.reduce((acc: Record<string, number>, trigger) => {
+      acc[trigger] = (acc[trigger] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(triggerCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([trigger, count]) => ({ trigger, count }));
+  };
+
+  const getAverageEnergy = () => {
+    if (moodHistory.length === 0) return 5;
+    return Math.round(
+      moodHistory.slice(0, 7).reduce((sum, e) => sum + e.energy_level, 0) / Math.min(7, moodHistory.length)
+    );
+  };
+
+  const getAverageStress = () => {
+    if (moodHistory.length === 0) return 5;
+    return Math.round(
+      moodHistory.slice(0, 7).reduce((sum, e) => sum + e.stress_level, 0) / Math.min(7, moodHistory.length)
+    );
+  };
+
+  const moodTrend = getMoodTrend();
+  const commonTriggers = getCommonTriggers();
+  const averageEnergy = getAverageEnergy();
+  const averageStress = getAverageStress();
 
   return (
     <div className="h-full overflow-auto relative">
@@ -239,6 +282,17 @@ export function MoodTracker() {
                   />
                 </div>
 
+                <div>
+                  <label className="block text-gray-300 mb-2">Activities Today (comma-separated)</label>
+                  <input
+                    type="text"
+                    value={activities.join(', ')}
+                    onChange={(e) => setActivities(e.target.value.split(',').map(a => a.trim()).filter(a => a))}
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors"
+                    placeholder="exercise, meditation, socializing, etc."
+                  />
+                </div>
+
                 <div className="flex space-x-4">
                   <button
                     onClick={handleSubmit}
@@ -255,6 +309,104 @@ export function MoodTracker() {
                   </button>
                 </div>
               </div>
+            </motion.div>
+          )}
+
+          <motion.button
+            onClick={() => setShowAnalytics(!showAnalytics)}
+            className="mt-8 w-full bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl py-4 font-bold text-white hover:border-teal-500/50 transition-all duration-300 flex items-center justify-center space-x-2"
+            whileHover={{ scale: 1.01 }}
+          >
+            <BarChart3 className="w-5 h-5" />
+            <span>{showAnalytics ? 'Hide' : 'Show'} Analytics & Insights</span>
+          </motion.button>
+
+          {showAnalytics && (
+            <motion.div
+              className="mt-8 space-y-6"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <TrendingUp className="w-6 h-6 text-teal-400" />
+                    <h4 className="text-xl font-bold text-white">Mood Trend</h4>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-3xl">
+                      {moodTrend === 'improving' ? '📈' : moodTrend === 'declining' ? '📉' : '➡️'}
+                    </span>
+                    <div>
+                      <p className="text-2xl font-bold text-white capitalize">{moodTrend}</p>
+                      <p className="text-sm text-gray-400">
+                        {moodTrend === 'improving' && 'Keep up the great work!'}
+                        {moodTrend === 'stable' && 'Maintaining consistency'}
+                        {moodTrend === 'declining' && 'Consider extra self-care'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <Activity className="w-6 h-6 text-blue-400" />
+                    <h4 className="text-xl font-bold text-white">Energy & Stress</h4>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-gray-400">Avg Energy</span>
+                        <span className="text-white font-bold">{averageEnergy}/10</span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-green-500 to-teal-500 h-2 rounded-full"
+                          style={{ width: `${(averageEnergy / 10) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-gray-400">Avg Stress</span>
+                        <span className="text-white font-bold">{averageStress}/10</span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full"
+                          style={{ width: `${(averageStress / 10) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {commonTriggers.length > 0 && (
+                <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <Brain className="w-6 h-6 text-pink-400" />
+                    <h4 className="text-xl font-bold text-white">Common Triggers</h4>
+                  </div>
+                  <div className="space-y-3">
+                    {commonTriggers.map(({ trigger, count }) => (
+                      <div key={trigger} className="flex items-center justify-between">
+                        <span className="text-gray-300 capitalize">{trigger}</span>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-32 bg-gray-700 rounded-full h-2">
+                            <div
+                              className="bg-gradient-to-r from-pink-500 to-red-500 h-2 rounded-full"
+                              style={{ width: `${(count / moodHistory.length) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-white font-bold w-8 text-right">{count}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
 

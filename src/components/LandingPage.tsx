@@ -1,28 +1,25 @@
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
-import { ParticleSystem } from './three/ParticleSystem';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Heart, MessageCircle, BookOpen, Brain } from 'lucide-react';
 import { Card3D } from './Card3D';
+import { AmbientBackground } from './three/AmbientBackground';
 
 interface LandingPageProps {
   onGetStarted: () => void;
 }
 
 export function LandingPage({ onGetStarted }: LandingPageProps) {
+  const { scrollYProgress } = useScroll();
+  const y = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.6]);
+
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-teal-900 overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <Canvas>
-          <PerspectiveCamera makeDefault position={[0, 0, 5]} />
-          <ambientLight intensity={0.5} />
-          <pointLight position={[10, 10, 10]} intensity={1} />
-          <ParticleSystem count={1500} color="#4ade80" size={0.03} speed={0.3} />
-          <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
-        </Canvas>
-      </div>
+      <AmbientBackground variant="landing" />
 
-      <div className="relative z-10 container mx-auto px-6 py-12">
+      <motion.div
+        className="relative z-10 container mx-auto px-6 py-12"
+        style={{ y, opacity }}
+      >
         <motion.header
           className="flex justify-between items-center mb-20"
           initial={{ opacity: 0, y: -20 }}
@@ -31,7 +28,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
         >
           <div className="flex items-center space-x-2">
             <Heart className="w-8 h-8 text-teal-400" />
-            <span className="text-2xl font-bold text-white">MindfulCompanion</span>
+            <span className="text-2xl font-bold text-white">MindMate</span>
           </div>
           <button
             onClick={onGetStarted}
@@ -125,7 +122,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             Crisis support available. If you're in danger, please call 988 immediately.
           </p>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   );
 }

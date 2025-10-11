@@ -23,6 +23,7 @@ export type MoodEntry = {
   stress_level: number;
   notes: string;
   triggers: string[];
+  activities: string[];
   created_at: string;
 };
 
