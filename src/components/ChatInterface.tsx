@@ -142,11 +142,19 @@ export function ChatInterface() {
               <div>
                 <h3 className="text-red-400 font-bold mb-2">Crisis Support Resources</h3>
                 <p className="text-gray-300 text-sm mb-2">
-                  If you're having thoughts of self-harm or suicide, please reach out for immediate help:
+                  I'm really sorry you're feeling this way. You're not alone. Please reach out for immediate help:
                 </p>
-                <div className="space-y-1 text-sm text-gray-300">
-                  <p><strong>Call 988</strong> - National Suicide Prevention Lifeline</p>
-                  <p><strong>Text HOME to 741741</strong> - Crisis Text Line</p>
+                <div className="space-y-2 text-sm text-gray-300">
+                  <div>
+                    <p className="font-semibold text-gray-200">United States</p>
+                    <p><strong>Call 988</strong> - National Suicide Prevention Lifeline</p>
+                    <p><strong>Text HOME to 741741</strong> - Crisis Text Line</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-200">India</p>
+                    <p><strong>AASRA:</strong> 91-9820466726 or 9152987821</p>
+                    <p><strong>Vandrevala Foundation:</strong> 1860-2662-345</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setShowCrisisWarning(false)}

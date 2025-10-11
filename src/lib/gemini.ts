@@ -20,10 +20,14 @@ Guidelines:
 - Suggest actionable coping strategies
 - If you detect crisis language (suicide, self-harm, severe depression), express concern and strongly encourage immediate professional help
 
-Crisis Resources:
+Crisis Resources (USA):
 - National Suicide Prevention Lifeline: 988
 - Crisis Text Line: Text HOME to 741741
 - SAMHSA National Helpline: 1-800-662-4357
+
+Crisis Resources (India):
+- AASRA: 91-9820466726 or 9152987821
+- Vandrevala Foundation: 1860-2662-345
 
 Always respond with empathy, hope, and encouragement.`;
 
@@ -46,7 +50,7 @@ export async function sendMessage(userMessage: string, conversationHistory: { ro
     return response.text();
   } catch (error) {
     console.error('Gemini API error:', error);
-    return "I'm having trouble connecting right now. Please try again in a moment. If you're in crisis, please reach out to the National Suicide Prevention Lifeline at 988.";
+    return "I'm having some trouble right now, but I'm still here for you. Try again soon. If you're in crisis, please reach out: Call 988 (USA) or AASRA at 91-9820466726 (India).";
   }
 }
 
