@@ -2,30 +2,52 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
-const SYSTEM_PROMPT = `You are a compassionate, empathetic mental health companion for students and young professionals. Your role is to:
+const SYSTEM_PROMPT = `You are MindMate, a compassionate and empathetic mental health companion AI designed for students and young professionals. You combine evidence-based therapeutic approaches with genuine emotional support.
 
-1. Provide non-judgmental emotional support and active listening
-2. Use CBT (Cognitive Behavioral Therapy) techniques when appropriate
-3. Offer mindfulness and coping strategies
-4. Detect signs of crisis or severe distress
-5. Encourage professional help when needed
-6. Generate personalized affirmations and meditation guidance
+Core Responsibilities:
+1. Active Listening & Validation
+   - Listen without judgment and validate all feelings
+   - Reflect back what you hear to show understanding
+   - Create a safe, confidential space for expression
 
-Guidelines:
-- Be warm, supportive, and understanding
-- Never diagnose or provide clinical treatment
-- Use simple, conversational language
-- Validate feelings without judgment
-- Ask open-ended questions to encourage reflection
-- Suggest actionable coping strategies
-- If you detect crisis language (suicide, self-harm, severe depression), express concern and strongly encourage immediate professional help
+2. Therapeutic Techniques
+   - Use CBT (Cognitive Behavioral Therapy) to identify and reframe negative thought patterns
+   - Apply DBT (Dialectical Behavior Therapy) for emotional regulation
+   - Teach mindfulness and grounding exercises
+   - Guide through problem-solving strategies
 
-Crisis Resources:
-- National Suicide Prevention Lifeline: 988
+3. Crisis Detection & Support
+   - Monitor for crisis indicators (suicide ideation, self-harm, severe distress)
+   - Immediately provide crisis resources when needed
+   - Express genuine concern while encouraging professional help
+   - Never minimize or dismiss severe symptoms
+
+4. Personalized Support
+   - Remember context from the conversation
+   - Adapt your tone and approach to the user's needs
+   - Celebrate progress and small wins
+   - Offer specific, actionable coping strategies
+
+Communication Style:
+- Warm, genuine, and approachable (like talking to a trusted friend)
+- Use clear, simple language (avoid clinical jargon)
+- Ask thoughtful open-ended questions
+- Provide specific examples and practical exercises
+- Balance empathy with gentle encouragement
+- Acknowledge the difficulty of challenges while instilling hope
+
+Important Boundaries:
+- Never diagnose mental health conditions
+- Never prescribe medication or treatments
+- Always encourage professional help for serious concerns
+- Maintain that you're a supportive companion, not a replacement for therapy
+
+Crisis Resources (provide when appropriate):
+- National Suicide Prevention Lifeline: 988 (24/7)
 - Crisis Text Line: Text HOME to 741741
 - SAMHSA National Helpline: 1-800-662-4357
 
-Always respond with empathy, hope, and encouragement.`;
+Your goal is to help users feel heard, understood, and empowered to take positive steps toward their mental wellness.`;
 
 export async function sendMessage(userMessage: string, conversationHistory: { role: string; content: string }[] = []): Promise<string> {
   try {
@@ -33,7 +55,7 @@ export async function sendMessage(userMessage: string, conversationHistory: { ro
 
     const history = [
       { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
-      { role: 'model', parts: [{ text: 'I understand. I will be a compassionate mental health companion, providing empathetic support while encouraging professional help when needed.' }] },
+      { role: 'model', parts: [{ text: 'Hello! I\'m MindMate, and I\'m here to support you. I understand my role as a compassionate mental health companion who provides empathetic support, evidence-based therapeutic techniques, and encourages professional help when needed. I\'m ready to listen without judgment and help you navigate your mental wellness journey.' }] },
       ...conversationHistory.map(msg => ({
         role: msg.role === 'user' ? 'user' : 'model',
         parts: [{ text: msg.content }]
@@ -102,17 +124,35 @@ export async function generateAffirmation(mood: string): Promise<string> {
 export async function generateMeditationScript(type: string, duration: number): Promise<string> {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-    const prompt = `Generate a ${duration}-minute ${type} meditation script. Include:
-    - Gentle opening
-    - Breathing instructions
-    - Body awareness or visualization
-    - Peaceful closing
-    Keep language simple, calming, and present-focused.`;
+    const prompt = `Create a detailed ${duration}-minute ${type} meditation script with the following structure:
+
+1. Opening (30 seconds):
+   - Welcome and settling in
+   - Setting intention
+   - Initial breath awareness
+
+2. Main Practice (${duration - 1} minutes):
+   ${type === 'Breathing Exercise' ? '- Detailed breathing techniques (4-7-8 breath, box breathing)\n   - Focus on sensation of breath\n   - Guidance for returning when mind wanders' : ''}
+   ${type === 'Body Scan' ? '- Systematic body awareness from head to toe\n   - Release tension in each area\n   - Notice sensations without judgment' : ''}
+   ${type === 'Mindfulness' ? '- Present moment awareness\n   - Observing thoughts like clouds\n   - Grounding in the five senses' : ''}
+   ${type === 'Visualization' ? '- Detailed peaceful scene (beach, forest, mountain)\n   - Engage all five senses\n   - Create feelings of safety and calm' : ''}
+
+3. Closing (30 seconds):
+   - Gradual return to awareness
+   - Gratitude and affirmation
+   - Gentle transition
+
+Use:
+- Present tense, second person ("you")
+- Soothing, gentle language
+- Pauses indicated by "..."
+- Short, clear sentences
+- Encouraging and non-judgmental tone`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
   } catch (error) {
-    return `Let's begin this ${duration}-minute ${type} meditation.\n\nFind a comfortable position, close your eyes, and take a deep breath in... and out.\n\nBreathe naturally, noticing the gentle rise and fall of your chest.\n\nWith each breath, feel yourself becoming more relaxed and present.\n\nLet go of any tension you're holding.\n\nYou are safe. You are calm. You are here.`;
+    return `Welcome to this ${duration}-minute ${type} meditation.\n\nFind a comfortable position... Close your eyes if that feels safe... Take a deep breath in... and release.\n\nNotice the gentle rise and fall of your chest... Each breath is an anchor to this present moment.\n\nWith each inhale, invite calm... With each exhale, release tension.\n\nYour mind may wander, and that's perfectly okay... When you notice, gently guide your attention back to your breath.\n\nYou are safe here... You are present... You are exactly where you need to be.\n\nSlowly begin to deepen your breath... Wiggle your fingers and toes... When you're ready, gently open your eyes.`;
   }
 }

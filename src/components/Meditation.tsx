@@ -8,35 +8,44 @@ import { supabase } from '../lib/supabase';
 import { generateMeditationScript } from '../lib/gemini';
 import { WaveBackground } from './three/WaveBackground';
 import { ParticleSystem } from './three/ParticleSystem';
+import { BreathingFlower } from './three/BreathingFlower';
 
 const MEDITATION_TYPES = [
   {
     id: 'breathing',
     name: 'Breathing Exercise',
-    description: 'Focus on your breath to calm your mind',
+    description: 'Regulate your nervous system with controlled breathing',
+    longDescription: 'Deep breathing activates your parasympathetic nervous system, reducing stress hormones and promoting relaxation. This practice is especially helpful for anxiety and panic.',
     duration: 5,
     color: '#14b8a6',
+    benefits: ['Reduces anxiety', 'Lowers heart rate', 'Improves focus']
   },
   {
     id: 'body-scan',
     name: 'Body Scan',
-    description: 'Release tension from head to toe',
+    description: 'Progressive relaxation from head to toe',
+    longDescription: 'Body scan meditation increases body awareness and releases physical tension. By systematically relaxing each part of your body, you activate the relaxation response.',
     duration: 10,
     color: '#10b981',
+    benefits: ['Releases muscle tension', 'Improves sleep', 'Heightens body awareness']
   },
   {
     id: 'mindfulness',
     name: 'Mindfulness',
-    description: 'Be present in the current moment',
+    description: 'Anchor yourself in the present moment',
+    longDescription: 'Mindfulness meditation trains your mind to observe thoughts without judgment. Research shows it reduces rumination, improves emotional regulation, and increases gray matter in the brain.',
     duration: 7,
     color: '#4ade80',
+    benefits: ['Reduces rumination', 'Enhances focus', 'Improves emotional balance']
   },
   {
     id: 'visualization',
     name: 'Visualization',
-    description: 'Imagine a peaceful, calming place',
+    description: 'Create a mental sanctuary of peace and safety',
+    longDescription: 'Guided imagery activates the same neural pathways as actual experiences, creating feelings of safety and calm. It\'s powerful for managing PTSD, anxiety, and chronic stress.',
     duration: 8,
     color: '#22d3ee',
+    benefits: ['Creates sense of safety', 'Reduces stress', 'Builds positive associations']
   },
 ];
 
@@ -49,7 +58,10 @@ export function Meditation() {
   const [moodBefore, setMoodBefore] = useState<number | null>(null);
   const [moodAfter, setMoodAfter] = useState<number | null>(null);
   const [showMoodCheck, setShowMoodCheck] = useState<'before' | 'after' | null>(null);
+  const [breathPhase, setBreathPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
+  const [breathProgress, setBreathProgress] = useState(0);
   const intervalRef = useRef<number | null>(null);
+  const breathIntervalRef = useRef<number | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -75,6 +87,44 @@ export function Meditation() {
       }
     };
   }, [isActive, timeRemaining]);
+
+  useEffect(() => {
+    if (isActive) {
+      const breathCycleDuration = 12000;
+      const inhaleTime = 4000;
+      const holdTime = 2000;
+      const exhaleTime = 6000;
+
+      const updateBreath = () => {
+        const now = Date.now();
+        const cyclePosition = now % breathCycleDuration;
+
+        if (cyclePosition < inhaleTime) {
+          setBreathPhase('inhale');
+          setBreathProgress(cyclePosition / inhaleTime);
+        } else if (cyclePosition < inhaleTime + holdTime) {
+          setBreathPhase('hold');
+          setBreathProgress(1);
+        } else {
+          setBreathPhase('exhale');
+          setBreathProgress(1 - (cyclePosition - inhaleTime - holdTime) / exhaleTime);
+        }
+      };
+
+      updateBreath();
+      breathIntervalRef.current = window.setInterval(updateBreath, 50);
+    } else {
+      if (breathIntervalRef.current) {
+        clearInterval(breathIntervalRef.current);
+      }
+    }
+
+    return () => {
+      if (breathIntervalRef.current) {
+        clearInterval(breathIntervalRef.current);
+      }
+    };
+  }, [isActive]);
 
   const handleStart = async () => {
     if (!script) {
@@ -138,12 +188,18 @@ export function Meditation() {
     <div className="h-full relative overflow-hidden">
       <div className="absolute inset-0 z-0">
         <Canvas>
-          <PerspectiveCamera makeDefault position={[0, 2, 5]} />
+          <PerspectiveCamera makeDefault position={[0, 0, 8]} />
           <ambientLight intensity={0.3} />
-          <pointLight position={[10, 10, 10]} intensity={0.5} />
-          <WaveBackground color={selectedType.color} opacity={0.3} />
-          <ParticleSystem count={1000} color={selectedType.color} size={0.02} speed={0.2} />
-          <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.2} />
+          {isActive && selectedType.id === 'breathing' ? (
+            <BreathingFlower isInhaling={breathPhase === 'inhale'} breathProgress={breathProgress} />
+          ) : (
+            <>
+              <pointLight position={[10, 10, 10]} intensity={0.5} />
+              <WaveBackground color={selectedType.color} opacity={0.3} />
+              <ParticleSystem count={1000} color={selectedType.color} size={0.02} speed={0.2} />
+            </>
+          )}
+          <OrbitControls enableZoom={false} enablePan={false} autoRotate={!isActive} autoRotateSpeed={0.2} />
         </Canvas>
       </div>
 
@@ -159,7 +215,7 @@ export function Meditation() {
                 Guided Meditation
               </motion.h2>
               <p className="text-gray-300 text-center mb-12">
-                Find peace and calm your mind with AI-guided meditation
+                Evidence-based practices to calm your mind and reduce stress
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -173,7 +229,7 @@ export function Meditation() {
                     }}
                     className={`bg-gray-800/80 backdrop-blur-xl border-2 rounded-2xl p-6 text-left transition-all duration-300 ${
                       selectedType.id === type.id
-                        ? 'border-teal-500 bg-teal-500/20'
+                        ? 'border-teal-500 bg-teal-500/20 shadow-xl shadow-teal-500/20'
                         : 'border-gray-700/50 hover:border-gray-600'
                     }`}
                     whileHover={{ scale: 1.02 }}
@@ -181,6 +237,14 @@ export function Meditation() {
                   >
                     <h3 className="text-xl font-bold text-white mb-2">{type.name}</h3>
                     <p className="text-gray-400 mb-3">{type.description}</p>
+                    <p className="text-sm text-gray-500 mb-3">{type.longDescription}</p>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {type.benefits.map((benefit, i) => (
+                        <span key={i} className="px-2 py-1 bg-teal-500/20 text-teal-300 text-xs rounded-full">
+                          {benefit}
+                        </span>
+                      ))}
+                    </div>
                     <p className="text-teal-400 font-semibold">{type.duration} minutes</p>
                   </motion.button>
                 ))}
@@ -242,6 +306,19 @@ export function Meditation() {
                   <div className="text-6xl font-bold text-white">{formatTime(timeRemaining)}</div>
                 </div>
               </div>
+
+              {selectedType.id === 'breathing' && (
+                <div className="bg-gray-800/80 backdrop-blur-xl border border-teal-500/30 rounded-2xl p-6 mb-8">
+                  <p className="text-3xl font-bold text-center text-white mb-2">
+                    {breathPhase === 'inhale' ? 'Breathe In' : breathPhase === 'hold' ? 'Hold' : 'Breathe Out'}
+                  </p>
+                  <p className="text-center text-gray-400">
+                    {breathPhase === 'inhale' && 'Fill your lungs slowly...'}
+                    {breathPhase === 'hold' && 'Hold gently...'}
+                    {breathPhase === 'exhale' && 'Release all tension...'}
+                  </p>
+                </div>
+              )}
 
               <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 mb-8 max-h-48 overflow-y-auto">
                 <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{script}</p>
