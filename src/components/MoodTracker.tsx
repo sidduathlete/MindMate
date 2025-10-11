@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
-import { motion } from 'framer-motion';
-import { Smile, Frown, Meh, TrendingUp, Calendar } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Smile, Frown, Meh, TrendingUp, Calendar, Activity, Battery, AlertCircle, BarChart3, Lightbulb } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, MoodEntry } from '../lib/supabase';
 import { Card3D } from './Card3D';
@@ -29,6 +29,8 @@ export function MoodTracker() {
   const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([]);
   const [affirmation, setAffirmation] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
+  const [gratitude, setGratitude] = useState('');
   const { user } = useAuth();
 
   useEffect(() => {
@@ -88,6 +90,69 @@ export function MoodTracker() {
         )
       : 5;
 
+  const averageEnergy =
+    moodHistory.length > 0
+      ? Math.round(
+          moodHistory.slice(0, 7).reduce((sum, entry) => sum + (entry.energy_level || 5), 0) /
+            Math.min(moodHistory.length, 7)
+        )
+      : 5;
+
+  const averageStress =
+    moodHistory.length > 0
+      ? Math.round(
+          moodHistory.slice(0, 7).reduce((sum, entry) => sum + (entry.stress_level || 5), 0) /
+            Math.min(moodHistory.length, 7)
+        )
+      : 5;
+
+  const getMoodTrend = () => {
+    if (moodHistory.length < 2) return 'neutral';
+    const recent = moodHistory.slice(0, 3).reduce((sum, e) => sum + e.mood_score, 0) / 3;
+    const older = moodHistory.slice(3, 6).reduce((sum, e) => sum + e.mood_score, 0) / Math.max(1, moodHistory.slice(3, 6).length);
+    if (recent > older + 1) return 'improving';
+    if (recent < older - 1) return 'declining';
+    return 'stable';
+  };
+
+  const getTopTriggers = () => {
+    const triggerCount: Record<string, number> = {};
+    moodHistory.forEach(entry => {
+      entry.triggers.forEach(trigger => {
+        triggerCount[trigger] = (triggerCount[trigger] || 0) + 1;
+      });
+    });
+    return Object.entries(triggerCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+  };
+
+  const getInsights = () => {
+    const trend = getMoodTrend();
+    const insights = [];
+
+    if (trend === 'improving') {
+      insights.push('Your mood has been improving lately. Keep up the positive momentum!');
+    } else if (trend === 'declining') {
+      insights.push('Your mood has been declining. Consider reaching out to someone or trying a meditation session.');
+    }
+
+    if (averageStress > 7) {
+      insights.push('Your stress levels are high. Try breathing exercises or take breaks throughout the day.');
+    }
+
+    if (averageEnergy < 4) {
+      insights.push('Your energy seems low. Ensure you\'re getting enough sleep, staying hydrated, and moving your body.');
+    }
+
+    const topTriggers = getTopTriggers();
+    if (topTriggers.length > 0) {
+      insights.push(`Your most common trigger is "${topTriggers[0][0]}". Consider coping strategies specific to this.`);
+    }
+
+    return insights.length > 0 ? insights : ['Keep tracking your mood daily to unlock personalized insights!'];
+  };
+
   return (
     <div className="h-full overflow-auto relative">
       <div className="absolute inset-0 z-0 opacity-20">
@@ -105,7 +170,7 @@ export function MoodTracker() {
           <h2 className="text-3xl font-bold text-white mb-2">Mood Tracker</h2>
           <p className="text-gray-400 mb-8">Track your emotional wellness journey</p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
             <Card3D glowColor="rgba(74, 222, 128, 0.4)">
               <div className="bg-gray-800/80 backdrop-blur-xl border border-teal-500/20 rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-2">
@@ -144,7 +209,99 @@ export function MoodTracker() {
                 </p>
               </div>
             </Card3D>
+
+            <Card3D glowColor="rgba(234, 179, 8, 0.4)">
+              <div className="bg-gray-800/80 backdrop-blur-xl border border-yellow-500/20 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-gray-400">Mood Trend</span>
+                  <Activity className="w-5 h-5 text-yellow-400" />
+                </div>
+                <p className="text-3xl font-bold text-white capitalize">
+                  {getMoodTrend()}
+                </p>
+                <p className="text-sm text-gray-400 mt-2">
+                  {getMoodTrend() === 'improving' ? '↗ Trending up' : getMoodTrend() === 'declining' ? '↘ Needs attention' : '→ Steady'}
+                </p>
+              </div>
+            </Card3D>
           </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <Card3D glowColor="rgba(59, 130, 246, 0.4)">
+              <div className="bg-gray-800/80 backdrop-blur-xl border border-blue-500/20 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-gray-400">Avg Energy</span>
+                  <Battery className="w-5 h-5 text-blue-400" />
+                </div>
+                <p className="text-4xl font-bold text-white">{averageEnergy}/10</p>
+                <p className="text-sm text-gray-400 mt-2">
+                  {averageEnergy >= 7 ? 'High energy!' : averageEnergy >= 4 ? 'Moderate energy' : 'Low energy'}
+                </p>
+              </div>
+            </Card3D>
+
+            <Card3D glowColor="rgba(239, 68, 68, 0.4)">
+              <div className="bg-gray-800/80 backdrop-blur-xl border border-red-500/20 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-gray-400">Avg Stress</span>
+                  <AlertCircle className="w-5 h-5 text-red-400" />
+                </div>
+                <p className="text-4xl font-bold text-white">{averageStress}/10</p>
+                <p className="text-sm text-gray-400 mt-2">
+                  {averageStress >= 7 ? 'High stress' : averageStress >= 4 ? 'Moderate stress' : 'Low stress'}
+                </p>
+              </div>
+            </Card3D>
+          </div>
+
+          <motion.button
+            onClick={() => setShowInsights(!showInsights)}
+            className="w-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 backdrop-blur-xl border-2 border-blue-500/30 rounded-2xl p-6 mb-8 hover:border-blue-500/50 transition-all duration-300"
+            whileHover={{ scale: 1.01 }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Lightbulb className="w-6 h-6 text-blue-400" />
+                <h3 className="text-xl font-bold text-white">Personalized Insights</h3>
+              </div>
+              <BarChart3 className="w-6 h-6 text-blue-400" />
+            </div>
+          </motion.button>
+
+          <AnimatePresence>
+            {showInsights && (
+              <motion.div
+                className="bg-gray-800/80 backdrop-blur-xl border border-blue-500/30 rounded-2xl p-6 mb-8"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <h4 className="text-lg font-bold text-white mb-4">Your Wellness Insights</h4>
+                <div className="space-y-3">
+                  {getInsights().map((insight, i) => (
+                    <div key={i} className="flex items-start space-x-3 bg-gray-900/50 rounded-xl p-3">
+                      <Lightbulb className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-gray-300 text-sm">{insight}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {getTopTriggers().length > 0 && (
+                  <div className="mt-6">
+                    <h5 className="text-white font-bold mb-3">Common Triggers</h5>
+                    <div className="flex flex-wrap gap-2">
+                      {getTopTriggers().map(([trigger, count]) => (
+                        <div key={trigger} className="bg-red-500/20 border border-red-500/30 rounded-lg px-3 py-2">
+                          <span className="text-red-300 text-sm font-medium">{trigger}</span>
+                          <span className="text-red-400 text-xs ml-2">({count}x)</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {affirmation && (
             <motion.div
@@ -225,6 +382,17 @@ export function MoodTracker() {
                     className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors"
                     rows={3}
                     placeholder="What's on your mind?"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-300 mb-2">Gratitude (optional)</label>
+                  <input
+                    type="text"
+                    value={gratitude}
+                    onChange={(e) => setGratitude(e.target.value)}
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors"
+                    placeholder="Something you're grateful for today..."
                   />
                 </div>
 

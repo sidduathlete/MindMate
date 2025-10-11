@@ -8,33 +8,38 @@ import { supabase } from '../lib/supabase';
 import { generateMeditationScript } from '../lib/gemini';
 import { WaveBackground } from './three/WaveBackground';
 import { ParticleSystem } from './three/ParticleSystem';
+import { BreathingCircles } from './three/BreathingCircles';
 
 const MEDITATION_TYPES = [
   {
     id: 'breathing',
     name: 'Breathing Exercise',
-    description: 'Focus on your breath to calm your mind',
+    description: 'Master the 4-4-4-4 technique: inhale, hold, exhale, pause',
+    instructions: 'Follow the expanding circles. Breathe in deeply for 4 counts, hold for 4, exhale slowly for 4, and pause for 4. This pattern calms the nervous system and reduces anxiety.',
     duration: 5,
     color: '#14b8a6',
   },
   {
     id: 'body-scan',
     name: 'Body Scan',
-    description: 'Release tension from head to toe',
+    description: 'Progressive muscle relaxation from head to toe',
+    instructions: 'Systematically focus on each body part, releasing tension as you go. Start with your scalp, move through facial muscles, neck, shoulders, arms, chest, abdomen, legs, and feet. Notice sensations without judgment.',
     duration: 10,
     color: '#10b981',
   },
   {
     id: 'mindfulness',
     name: 'Mindfulness',
-    description: 'Be present in the current moment',
+    description: 'Anchor yourself in the present moment',
+    instructions: 'Notice your thoughts, feelings, and sensations without judgment. When your mind wanders, gently return to your breath. Observe thoughts like clouds passing by, acknowledging them without attachment.',
     duration: 7,
     color: '#4ade80',
   },
   {
     id: 'visualization',
     name: 'Visualization',
-    description: 'Imagine a peaceful, calming place',
+    description: 'Create your perfect peaceful sanctuary',
+    instructions: 'Imagine a place where you feel completely safe and calm. Engage all senses: see the colors, hear the sounds, feel the textures, smell the air. Return to this sanctuary whenever stress arises.',
     duration: 8,
     color: '#22d3ee',
   },
@@ -46,6 +51,7 @@ export function Meditation() {
   const [timeRemaining, setTimeRemaining] = useState(300);
   const [script, setScript] = useState('');
   const [loading, setLoading] = useState(false);
+  const [breathingPhase, setBreathingPhase] = useState<'inhale' | 'hold' | 'exhale' | 'pause'>('inhale');
   const [moodBefore, setMoodBefore] = useState<number | null>(null);
   const [moodAfter, setMoodAfter] = useState<number | null>(null);
   const [showMoodCheck, setShowMoodCheck] = useState<'before' | 'after' | null>(null);
@@ -75,6 +81,21 @@ export function Meditation() {
       }
     };
   }, [isActive, timeRemaining]);
+
+  useEffect(() => {
+    if (isActive && selectedType.id === 'breathing') {
+      const breathingCycle = 16000;
+      const phaseInterval = setInterval(() => {
+        const elapsed = Date.now() % breathingCycle;
+        if (elapsed < 4000) setBreathingPhase('inhale');
+        else if (elapsed < 8000) setBreathingPhase('hold');
+        else if (elapsed < 12000) setBreathingPhase('exhale');
+        else setBreathingPhase('pause');
+      }, 100);
+
+      return () => clearInterval(phaseInterval);
+    }
+  }, [isActive, selectedType.id]);
 
   const handleStart = async () => {
     if (!script) {
@@ -138,12 +159,18 @@ export function Meditation() {
     <div className="h-full relative overflow-hidden">
       <div className="absolute inset-0 z-0">
         <Canvas>
-          <PerspectiveCamera makeDefault position={[0, 2, 5]} />
+          <PerspectiveCamera makeDefault position={[0, 0, 5]} />
           <ambientLight intensity={0.3} />
           <pointLight position={[10, 10, 10]} intensity={0.5} />
-          <WaveBackground color={selectedType.color} opacity={0.3} />
-          <ParticleSystem count={1000} color={selectedType.color} size={0.02} speed={0.2} />
-          <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.2} />
+          {selectedType.id === 'breathing' ? (
+            <BreathingCircles isActive={isActive} breathingPhase={breathingPhase} />
+          ) : (
+            <>
+              <WaveBackground color={selectedType.color} opacity={0.3} />
+              <ParticleSystem count={1000} color={selectedType.color} size={0.02} speed={0.2} />
+            </>
+          )}
+          <OrbitControls enableZoom={false} enablePan={false} autoRotate={selectedType.id !== 'breathing'} autoRotateSpeed={0.2} />
         </Canvas>
       </div>
 
@@ -158,9 +185,14 @@ export function Meditation() {
               >
                 Guided Meditation
               </motion.h2>
-              <p className="text-gray-300 text-center mb-12">
-                Find peace and calm your mind with AI-guided meditation
+              <p className="text-gray-300 text-center mb-8">
+                Choose your practice. Each session includes AI-generated guidance tailored to your needs.
               </p>
+              <div className="bg-teal-500/10 border border-teal-500/30 rounded-xl p-4 mb-8 max-w-2xl mx-auto">
+                <p className="text-teal-300 text-sm text-center">
+                  Pro Tip: Practice daily for best results. Even 5 minutes can significantly reduce stress and improve focus.
+                </p>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 {MEDITATION_TYPES.map((type) => (
@@ -180,7 +212,8 @@ export function Meditation() {
                     whileTap={{ scale: 0.98 }}
                   >
                     <h3 className="text-xl font-bold text-white mb-2">{type.name}</h3>
-                    <p className="text-gray-400 mb-3">{type.description}</p>
+                    <p className="text-gray-300 mb-2">{type.description}</p>
+                    <p className="text-gray-400 text-sm mb-3">{type.instructions}</p>
                     <p className="text-teal-400 font-semibold">{type.duration} minutes</p>
                   </motion.button>
                 ))}
@@ -243,6 +276,17 @@ export function Meditation() {
                 </div>
               </div>
 
+              {selectedType.id === 'breathing' && isActive && (
+                <div className="bg-gray-800/80 backdrop-blur-xl border border-teal-500/30 rounded-2xl p-6 mb-6">
+                  <p className="text-2xl font-bold text-white text-center">
+                    {breathingPhase === 'inhale' && 'Breathe In...'}
+                    {breathingPhase === 'hold' && 'Hold...'}
+                    {breathingPhase === 'exhale' && 'Breathe Out...'}
+                    {breathingPhase === 'pause' && 'Pause...'}
+                  </p>
+                </div>
+              )}
+
               <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 mb-8 max-h-48 overflow-y-auto">
                 <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{script}</p>
               </div>
@@ -266,9 +310,14 @@ export function Meditation() {
                 </motion.button>
               </div>
 
-              <div className="mt-8 flex items-center justify-center space-x-2 text-gray-400">
-                <Volume2 className="w-5 h-5" />
-                <p className="text-sm">Find a quiet space and use headphones for the best experience</p>
+              <div className="mt-8 space-y-3">
+                <div className="flex items-center justify-center space-x-2 text-gray-400">
+                  <Volume2 className="w-5 h-5" />
+                  <p className="text-sm">Find a quiet space and use headphones for the best experience</p>
+                </div>
+                <div className="bg-gray-800/60 rounded-xl p-4 max-w-xl mx-auto">
+                  <p className="text-gray-300 text-sm text-center">{selectedType.instructions}</p>
+                </div>
               </div>
             </motion.div>
           </div>
