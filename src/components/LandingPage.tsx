@@ -1,9 +1,13 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { ParticleSystem } from './three/ParticleSystem';
+import { WaveBackground } from './three/WaveBackground';
+import { FloatingOrbs } from './three/FloatingOrbs';
+import { EnergyField } from './three/EnergyField';
 import { motion } from 'framer-motion';
-import { Heart, MessageCircle, BookOpen, Brain } from 'lucide-react';
+import { MessageCircle, BookOpen, Brain } from 'lucide-react';
 import { Card3D } from './Card3D';
+import { BrainIcon } from './BrainIcon';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -17,8 +21,12 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           <PerspectiveCamera makeDefault position={[0, 0, 5]} />
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} />
-          <ParticleSystem count={1500} color="#4ade80" size={0.03} speed={0.3} />
-          <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
+          <pointLight position={[-10, -10, -10]} intensity={0.5} color="#14b8a6" />
+          <ParticleSystem count={2000} color="#14b8a6" size={0.025} speed={0.4} />
+          <WaveBackground color="#0d9488" opacity={0.2} />
+          <FloatingOrbs />
+          <EnergyField />
+          <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.3} />
         </Canvas>
       </div>
 
@@ -29,9 +37,9 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <div className="flex items-center space-x-2">
-            <Heart className="w-8 h-8 text-teal-400" />
-            <span className="text-2xl font-bold text-white">MindfulCompanion</span>
+          <div className="flex items-center space-x-3">
+            <BrainIcon />
+            <span className="text-2xl font-bold text-white">MindMate</span>
           </div>
           <button
             onClick={onGetStarted}
@@ -48,10 +56,10 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           transition={{ duration: 1, delay: 0.2 }}
         >
           <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Unleash the Power
+            Your Journey to
             <br />
-            <span className="bg-gradient-to-r from-teal-400 to-green-400 bg-clip-text text-transparent">
-              of Mental Wellness
+            <span className="bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-300 bg-clip-text text-transparent">
+              Mental Wellness
             </span>
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
@@ -72,7 +80,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           transition={{ duration: 1, delay: 0.5 }}
         >
           <Card3D glowColor="rgba(20, 184, 166, 0.5)">
-            <div className="bg-gray-800/80 backdrop-blur-xl p-6 rounded-2xl border border-teal-500/20 h-full">
+            <div className="bg-gray-800/80 backdrop-blur-xl p-6 rounded-2xl border border-teal-500/20 h-full hover:border-teal-400/40 transition-all duration-300">
               <MessageCircle className="w-12 h-12 text-teal-400 mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">AI Therapy Chat</h3>
               <p className="text-gray-300">
@@ -81,9 +89,9 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             </div>
           </Card3D>
 
-          <Card3D glowColor="rgba(74, 222, 128, 0.5)">
-            <div className="bg-gray-800/80 backdrop-blur-xl p-6 rounded-2xl border border-green-500/20 h-full">
-              <Heart className="w-12 h-12 text-green-400 mb-4" />
+          <Card3D glowColor="rgba(20, 184, 166, 0.5)">
+            <div className="bg-gray-800/80 backdrop-blur-xl p-6 rounded-2xl border border-cyan-500/20 h-full hover:border-cyan-400/40 transition-all duration-300">
+              <Brain className="w-12 h-12 text-cyan-400 mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">Mood Tracking</h3>
               <p className="text-gray-300">
                 Visualize your emotional journey with interactive 3D mood boards and insights.
@@ -91,8 +99,8 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             </div>
           </Card3D>
 
-          <Card3D glowColor="rgba(34, 197, 94, 0.5)">
-            <div className="bg-gray-800/80 backdrop-blur-xl p-6 rounded-2xl border border-emerald-500/20 h-full">
+          <Card3D glowColor="rgba(20, 184, 166, 0.5)">
+            <div className="bg-gray-800/80 backdrop-blur-xl p-6 rounded-2xl border border-teal-600/20 h-full hover:border-teal-500/40 transition-all duration-300">
               <Brain className="w-12 h-12 text-emerald-400 mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">Guided Meditation</h3>
               <p className="text-gray-300">
@@ -101,8 +109,8 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             </div>
           </Card3D>
 
-          <Card3D glowColor="rgba(16, 185, 129, 0.5)">
-            <div className="bg-gray-800/80 backdrop-blur-xl p-6 rounded-2xl border border-cyan-500/20 h-full">
+          <Card3D glowColor="rgba(20, 184, 166, 0.5)">
+            <div className="bg-gray-800/80 backdrop-blur-xl p-6 rounded-2xl border border-emerald-500/20 h-full hover:border-emerald-400/40 transition-all duration-300">
               <BookOpen className="w-12 h-12 text-cyan-400 mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">Daily Journal</h3>
               <p className="text-gray-300">

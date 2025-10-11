@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, Heart, BookOpen, Brain, LogOut, Home } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,6 +8,9 @@ import { ChatInterface } from './ChatInterface';
 import { MoodTracker } from './MoodTracker';
 import { Journal } from './Journal';
 import { Meditation } from './Meditation';
+import { ParticleSystem } from './three/ParticleSystem';
+import { FloatingOrbs } from './three/FloatingOrbs';
+import { BrainIcon } from './BrainIcon';
 
 type View = 'home' | 'chat' | 'mood' | 'journal' | 'meditation';
 
@@ -26,15 +31,28 @@ export function Dashboard() {
   ];
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-teal-900">
+    <div className="relative flex h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-teal-900 overflow-hidden">
+      {currentView === 'home' && (
+        <div className="absolute inset-0 z-0">
+          <Canvas>
+            <PerspectiveCamera makeDefault position={[0, 0, 6]} />
+            <ambientLight intensity={0.4} />
+            <pointLight position={[10, 10, 10]} intensity={0.8} />
+            <pointLight position={[-10, -10, -10]} intensity={0.4} color="#14b8a6" />
+            <ParticleSystem count={1200} color="#14b8a6" size={0.02} speed={0.3} />
+            <FloatingOrbs />
+            <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.2} />
+          </Canvas>
+        </div>
+      )}
       <motion.aside
-        className="w-20 bg-gray-900/50 backdrop-blur-xl border-r border-gray-700/50 flex flex-col items-center py-6 space-y-6"
+        className="relative z-10 w-20 bg-gray-900/50 backdrop-blur-xl border-r border-gray-700/50 flex flex-col items-center py-6 space-y-6"
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-green-400 rounded-xl flex items-center justify-center">
-          <Heart className="w-6 h-6 text-white" />
+        <div className="w-12 h-12 flex items-center justify-center">
+          <BrainIcon />
         </div>
 
         <div className="flex-1 flex flex-col space-y-4">
@@ -63,7 +81,7 @@ export function Dashboard() {
         </button>
       </motion.aside>
 
-      <main className="flex-1 overflow-hidden">
+      <main className="relative z-10 flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
           {currentView === 'home' && (
             <motion.div
@@ -146,46 +164,58 @@ function HomeView({ onNavigate }: { onNavigate: (view: View) => void }) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <motion.button
           onClick={() => onNavigate('chat')}
-          className="bg-gray-800/50 backdrop-blur-xl border border-teal-500/20 rounded-2xl p-6 text-left hover:border-teal-500/50 transition-all duration-300 group"
-          whileHover={{ scale: 1.02 }}
+          className="bg-gray-800/70 backdrop-blur-xl border border-teal-500/30 rounded-2xl p-8 text-left hover:border-teal-400/60 hover:shadow-xl hover:shadow-teal-500/20 transition-all duration-300 group"
+          whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.98 }}
         >
-          <MessageCircle className="w-12 h-12 text-teal-400 mb-4 group-hover:scale-110 transition-transform" />
-          <h3 className="text-xl font-bold text-white mb-2">Talk to Your Companion</h3>
-          <p className="text-gray-400">Share your thoughts and feelings in a judgment-free space.</p>
+          <div className="relative">
+            <div className="absolute inset-0 bg-teal-400/10 rounded-full blur-xl group-hover:bg-teal-400/20 transition-all"></div>
+            <MessageCircle className="relative w-14 h-14 text-teal-400 mb-4 group-hover:scale-110 transition-transform" />
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-2">Talk to Your Companion</h3>
+          <p className="text-gray-300">Share your thoughts and feelings in a judgment-free space.</p>
         </motion.button>
 
         <motion.button
           onClick={() => onNavigate('mood')}
-          className="bg-gray-800/50 backdrop-blur-xl border border-pink-500/20 rounded-2xl p-6 text-left hover:border-pink-500/50 transition-all duration-300 group"
-          whileHover={{ scale: 1.02 }}
+          className="bg-gray-800/70 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-8 text-left hover:border-cyan-400/60 hover:shadow-xl hover:shadow-cyan-500/20 transition-all duration-300 group"
+          whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.98 }}
         >
-          <Heart className="w-12 h-12 text-pink-400 mb-4 group-hover:scale-110 transition-transform" />
-          <h3 className="text-xl font-bold text-white mb-2">Track Your Mood</h3>
-          <p className="text-gray-400">Visualize your emotional journey with interactive insights.</p>
+          <div className="relative">
+            <div className="absolute inset-0 bg-cyan-400/10 rounded-full blur-xl group-hover:bg-cyan-400/20 transition-all"></div>
+            <Heart className="relative w-14 h-14 text-cyan-400 mb-4 group-hover:scale-110 transition-transform" />
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-2">Track Your Mood</h3>
+          <p className="text-gray-300">Visualize your emotional journey with interactive insights.</p>
         </motion.button>
 
         <motion.button
           onClick={() => onNavigate('meditation')}
-          className="bg-gray-800/50 backdrop-blur-xl border border-green-500/20 rounded-2xl p-6 text-left hover:border-green-500/50 transition-all duration-300 group"
-          whileHover={{ scale: 1.02 }}
+          className="bg-gray-800/70 backdrop-blur-xl border border-teal-600/30 rounded-2xl p-8 text-left hover:border-teal-500/60 hover:shadow-xl hover:shadow-teal-600/20 transition-all duration-300 group"
+          whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.98 }}
         >
-          <Brain className="w-12 h-12 text-green-400 mb-4 group-hover:scale-110 transition-transform" />
-          <h3 className="text-xl font-bold text-white mb-2">Guided Meditation</h3>
-          <p className="text-gray-400">Find peace with AI-powered meditation sessions.</p>
+          <div className="relative">
+            <div className="absolute inset-0 bg-teal-400/10 rounded-full blur-xl group-hover:bg-teal-400/20 transition-all"></div>
+            <Brain className="relative w-14 h-14 text-teal-500 mb-4 group-hover:scale-110 transition-transform" />
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-2">Guided Meditation</h3>
+          <p className="text-gray-300">Find peace with AI-powered meditation sessions.</p>
         </motion.button>
 
         <motion.button
           onClick={() => onNavigate('journal')}
-          className="bg-gray-800/50 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-6 text-left hover:border-purple-500/50 transition-all duration-300 group"
-          whileHover={{ scale: 1.02 }}
+          className="bg-gray-800/70 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-8 text-left hover:border-emerald-400/60 hover:shadow-xl hover:shadow-emerald-500/20 transition-all duration-300 group"
+          whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.98 }}
         >
-          <BookOpen className="w-12 h-12 text-purple-400 mb-4 group-hover:scale-110 transition-transform" />
-          <h3 className="text-xl font-bold text-white mb-2">Daily Journal</h3>
-          <p className="text-gray-400">Reflect and process your thoughts through writing.</p>
+          <div className="relative">
+            <div className="absolute inset-0 bg-emerald-400/10 rounded-full blur-xl group-hover:bg-emerald-400/20 transition-all"></div>
+            <BookOpen className="relative w-14 h-14 text-emerald-400 mb-4 group-hover:scale-110 transition-transform" />
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-2">Daily Journal</h3>
+          <p className="text-gray-300">Reflect and process your thoughts through writing.</p>
         </motion.button>
       </div>
 

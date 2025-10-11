@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion } from 'framer-motion';
-import { Smile, Frown, Meh, TrendingUp, Calendar } from 'lucide-react';
+import { TrendingUp, Calendar, Activity } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, MoodEntry } from '../lib/supabase';
 import { Card3D } from './Card3D';
 import { FloatingSpheres } from './three/FloatingSpheres';
 import { generateAffirmation } from '../lib/gemini';
+import { MoodChart } from './MoodChart';
+import { MoodInsights } from './MoodInsights';
 
 const MOOD_OPTIONS = [
   { label: 'Happy', score: 10, emoji: '😊', color: '#4ade80' },
@@ -131,10 +133,10 @@ export function MoodTracker() {
             </Card3D>
 
             <Card3D glowColor="rgba(16, 185, 129, 0.4)">
-              <div className="bg-gray-800/80 backdrop-blur-xl border border-green-500/20 rounded-2xl p-6">
+              <div className="bg-gray-800/80 backdrop-blur-xl border border-emerald-500/20 rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-gray-400">Current Mood</span>
-                  <Smile className="w-5 h-5 text-green-400" />
+                  <Activity className="w-5 h-5 text-emerald-400" />
                 </div>
                 <p className="text-4xl font-bold text-white">
                   {moodHistory.length > 0 ? `${moodHistory[0].mood_score}/10` : '-'}
@@ -154,6 +156,13 @@ export function MoodTracker() {
             >
               <p className="text-lg text-white font-medium text-center">{affirmation}</p>
             </motion.div>
+          )}
+
+          {moodHistory.length >= 2 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <MoodChart entries={moodHistory} />
+              <MoodInsights entries={moodHistory} />
+            </div>
           )}
 
           {!showForm ? (
