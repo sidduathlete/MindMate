@@ -49,20 +49,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, username: string) => {
     try {
-      // pass username as metadata if you want it copied by the trigger
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: { username } // optional — copies into auth.raw_user_meta_data
-        }
+        options: { data: { username } } // optional
       });
-
+      console.log('signUp -> data:', data, 'error:', error);
       if (error) throw error;
-
-      // DO NOT insert into public.users here — trigger will create the row.
       return { error: null };
     } catch (error) {
+      console.error('signUp error:', error);
       return { error: error as Error };
     }
   };
@@ -73,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
         password,
       });
-
+      console.log('signIn -> data:', data, 'error:', error);
       if (error) throw error;
 
       if (data?.user?.id) {
@@ -91,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return { error: null };
     } catch (error) {
+      console.error('signIn error:', error);
       return { error: error as Error };
     }
   };
