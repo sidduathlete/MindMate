@@ -44,7 +44,7 @@ export function BreathingFlower({ isActive, color, progress }: BreathingFlowerPr
 
   return (
     <group ref={groupRef}>
-      <mesh>
+      <mesh scale={1 + progress / 100}>
         <sphereGeometry args={[0.5, 32, 32]} />
         <meshStandardMaterial
           color={color}

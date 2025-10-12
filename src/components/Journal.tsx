@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, Plus, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,13 +15,7 @@ export function Journal() {
   const [gratitude, setGratitude] = useState('');
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      loadEntries();
-    }
-  }, [user]);
-
-  const loadEntries = async () => {
+  const loadEntries = useCallback(async () => {
     if (!user) return;
 
     const { data, error } = await supabase
@@ -33,7 +27,11 @@ export function Journal() {
     if (!error && data) {
       setEntries(data);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadEntries();
+  }, [loadEntries]);
 
   const handleSubmit = async () => {
     if (!user || !content.trim()) return;

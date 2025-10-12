@@ -45,7 +45,7 @@ export function AuthForm({ onSuccess, onBack }: AuthFormProps) {
       }
       onSuccess();
     } catch (err: any) {
-      setError(err.message || 'An error occurred');
+      setError((err as Error).message || 'An error occurred');
     } finally {
       setLoading(false);
     }

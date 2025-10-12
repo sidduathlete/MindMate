@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion } from 'framer-motion';
@@ -33,13 +33,7 @@ export function MoodTracker() {
   const [showForm, setShowForm] = useState(false);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      loadMoodHistory();
-    }
-  }, [user]);
-
-  const loadMoodHistory = async () => {
+  const loadMoodHistory = useCallback(async () => {
     if (!user) return;
 
     const { data, error } = await supabase
@@ -52,7 +46,11 @@ export function MoodTracker() {
     if (!error && data) {
       setMoodHistory(data);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadMoodHistory();
+  }, [loadMoodHistory]);
 
   const handleSubmit = async () => {
     if (!selectedMood || !user) return;

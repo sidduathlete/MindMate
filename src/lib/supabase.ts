@@ -11,7 +11,7 @@ export type User = {
   email: string | null;
   created_at: string;
   last_login: string;
-  preferences: Record<string, any>;
+  preferences: Record<string, unknown>;
 };
 
 export type MoodEntry = {

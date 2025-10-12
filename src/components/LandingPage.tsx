@@ -69,7 +69,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             onClick={onGetStarted}
             className="px-8 py-4 bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-full font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
           >
-            Signup for free
+            Sign Up for free
           </button>
         </motion.div>
 

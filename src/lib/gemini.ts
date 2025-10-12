@@ -117,7 +117,7 @@ export async function generateAffirmation(mood: string): Promise<string> {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text().trim();
-  } catch (error) {
+  } catch (_error) {
     const defaultAffirmations = [
       'You are stronger than you know, and this moment does not define your worth.',
       'Every feeling is temporary. You have the power to navigate through this.',

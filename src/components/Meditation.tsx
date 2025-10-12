@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -48,7 +48,7 @@ export function Meditation() {
   const [script, setScript] = useState('');
   const [loading, setLoading] = useState(false);
   const [moodBefore, setMoodBefore] = useState<number | null>(null);
-  const [moodAfter, setMoodAfter] = useState<number | null>(null);
+  const [_moodAfter, setMoodAfter] = useState<number | null>(null);
   const [showMoodCheck, setShowMoodCheck] = useState<'before' | 'after' | null>(null);
   const intervalRef = useRef<number | null>(null);
   const { user } = useAuth();
