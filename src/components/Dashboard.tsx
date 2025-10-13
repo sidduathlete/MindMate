@@ -51,9 +51,9 @@ export function Dashboard() {
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="w-12 h-12 flex items-center justify-center">
+        <button onClick={() => setCurrentView('home')} className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-700/50 transition-colors">
           <BrainIcon />
-        </div>
+        </button>
 
         <div className="flex-1 flex flex-col space-y-4">
           {navItems.map((item) => (

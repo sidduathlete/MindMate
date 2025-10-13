@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion } from 'framer-motion';
-import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Volume2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { generateMeditationScript } from '../lib/gemini';
@@ -44,20 +44,25 @@ const MEDITATION_TYPES = [
 export function Meditation() {
   const [selectedType, setSelectedType] = useState(MEDITATION_TYPES[0]);
   const [isActive, setIsActive] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(300);
+  const [sessionInProgress, setSessionInProgress] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(MEDITATION_TYPES[0].duration * 60);
   const [script, setScript] = useState('');
+  const [scriptPromise, setScriptPromise] = useState<Promise<string> | null>(null);
   const [loading, setLoading] = useState(false);
   const [moodBefore, setMoodBefore] = useState<number | null>(null);
   const [_moodAfter, setMoodAfter] = useState<number | null>(null);
   const [showMoodCheck, setShowMoodCheck] = useState<'before' | 'after' | null>(null);
+  const [showDurationPicker, setShowDurationPicker] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState(5);
   const intervalRef = useRef<number | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
-    if (isActive && timeRemaining > 0) {
+    if (isActive) {
       intervalRef.current = window.setInterval(() => {
         setTimeRemaining((prev) => {
           if (prev <= 1) {
+            if (intervalRef.current) clearInterval(intervalRef.current);
             handleComplete();
             return 0;
           }
@@ -69,32 +74,73 @@ export function Meditation() {
         clearInterval(intervalRef.current);
       }
     }
-
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isActive, timeRemaining]);
+  }, [isActive]);
 
-  const handleStart = async () => {
-    if (!script) {
-      setLoading(true);
-      const generatedScript = await generateMeditationScript(
-        selectedType.name,
-        selectedType.duration
-      );
-      setScript(generatedScript);
-      setLoading(false);
+  const handleStart = () => {
+    setShowDurationPicker(true);
+  };
+
+  const handleDurationSelect = (duration: number) => {
+    setSelectedDuration(duration);
+    setShowDurationPicker(false);
+    setLoading(true);
+
+    let prompt = `Generate a ${duration}-minute guided meditation script for a '${selectedType.name}' session.`;
+    switch (selectedType.id) {
+      case 'breathing':
+        prompt += ' The script should focus heavily on the sensation of the breath, like the rise and fall of the chest, and use counting techniques.';
+        break;
+      case 'body-scan':
+        prompt += ' The script should guide the user to bring gentle, non-judgmental awareness to each part of the body, from the toes to the head, noticing any sensations and releasing tension.';
+        break;
+      case 'mindfulness':
+        prompt += ' The script should encourage the user to be present in the moment, observing thoughts and feelings without judgment, and gently returning their focus to the breath.';
+        break;
+      case 'visualization':
+        prompt += ' The script should create a vivid, peaceful, and calming scene for the user to imagine, engaging multiple senses (sight, sound, smell).';
+        break;
     }
-
+    setScriptPromise(generateMeditationScript(selectedType.name, duration));
     setShowMoodCheck('before');
   };
 
-  const handleMoodBeforeSubmit = (mood: number) => {
+  const cleanScript = (rawText: string) => {
+    // Remove conversational intro and markdown
+    const lines = rawText.split('\n');
+    const scriptStartIndex = lines.findIndex(line => line.startsWith('**Title') || line.startsWith('###'));
+    
+    if (scriptStartIndex === -1) return rawText; // Return raw if format is unexpected
+
+    return lines.slice(scriptStartIndex)
+      .map(line => line
+        .replace(/\*\*Title:\*\*/g, '')
+        .replace(/\(Approximate timing: [^)]+\)/g, '')
+        .replace(/\(\.\.\.\)/g, '')
+        .replace(/###/g, '')
+        .trim()
+      )
+      .filter(line => line.length > 0)
+      .join('\n\n');
+  };
+
+  const handleMoodBeforeSubmit = async (mood: number) => {
     setMoodBefore(mood);
     setShowMoodCheck(null);
-    setTimeRemaining(selectedType.duration * 60);
+
+    if (scriptPromise) {
+      const generatedScript = await scriptPromise;
+      setScript(cleanScript(generatedScript));
+      setScriptPromise(null);
+      setLoading(false);
+    }
+
+    setSessionInProgress(true);
+    setTimeRemaining(selectedDuration * 60);
     setIsActive(true);
   };
 
@@ -106,25 +152,35 @@ export function Meditation() {
   const handleMoodAfterSubmit = async (mood: number) => {
     setMoodAfter(mood);
     setShowMoodCheck(null);
+    setSessionInProgress(false);
 
     if (user && moodBefore !== null) {
       await supabase.from('meditation_sessions').insert({
         user_id: user.id,
-        duration_minutes: selectedType.duration,
+        duration_minutes: selectedDuration,
         meditation_type: selectedType.name,
         completed: true,
         mood_before: moodBefore,
         mood_after: mood,
       });
     }
+    handleReset(true);
   };
 
-  const handleReset = () => {
+  const handleReset = (isEnd = false) => {
     setIsActive(false);
-    setTimeRemaining(selectedType.duration * 60);
-    setScript('');
-    setMoodBefore(null);
-    setMoodAfter(null);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    setTimeRemaining(selectedDuration * 60);
+    if (isEnd) {
+      setScript('');
+      setMoodBefore(null);
+      setMoodAfter(null);
+      setSessionInProgress(false);
+      setShowMoodCheck(null);
+      setShowDurationPicker(false);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -133,86 +189,41 @@ export function Meditation() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progress = ((selectedType.duration * 60 - timeRemaining) / (selectedType.duration * 60)) * 100;
+  const progress = ((selectedDuration * 60 - timeRemaining) / (selectedDuration * 60)) * 100;
 
-  return (
-    <div className="h-full relative overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <Canvas>
-          <PerspectiveCamera makeDefault position={[0, 0, 8]} />
-          <ambientLight intensity={0.5} />
-          <pointLight position={[10, 10, 10]} intensity={0.8} />
-          <pointLight position={[-10, -10, -5]} intensity={0.5} color={selectedType.color} />
-          {isActive && <BreathingFlower isActive={isActive} color={selectedType.color} progress={progress} />}
-          <WaveBackground color={selectedType.color} opacity={0.2} />
-          <ParticleSystem count={1500} color={selectedType.color} size={0.02} speed={0.2} />
-          <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.1} />
-        </Canvas>
-      </div>
+  const renderContent = () => {
+    if (showDurationPicker) {
+      return <DurationPicker onSelect={handleDurationSelect} onCancel={() => setShowDurationPicker(false)} />;
+    }
 
-      <div className="relative z-10 h-full flex flex-col">
-        {!isActive && !showMoodCheck ? (
-          <div className="flex-1 flex items-center justify-center p-8">
-            <div className="max-w-4xl w-full">
-              <motion.h2
-                className="text-4xl font-bold text-white text-center mb-4"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                Guided Meditation
-              </motion.h2>
-              <p className="text-gray-300 text-center mb-12">
-                Find peace and calm your mind with AI-guided meditation
-              </p>
+    if (showMoodCheck) {
+      return (
+        <MoodCheck
+          type={showMoodCheck}
+          onSubmit={showMoodCheck === 'before' ? handleMoodBeforeSubmit : handleMoodAfterSubmit}
+          onCancel={() => {
+            setShowMoodCheck(null);
+            setSessionInProgress(false);
+            setScriptPromise(null);
+            setLoading(false);
+          }}
+        />
+      );
+    }
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {MEDITATION_TYPES.map((type) => (
-                  <motion.button
-                    key={type.id}
-                    onClick={() => {
-                      setSelectedType(type);
-                      setScript('');
-                      setTimeRemaining(type.duration * 60);
-                    }}
-                    className={`bg-gray-800/80 backdrop-blur-xl border-2 rounded-2xl p-6 text-left transition-all duration-300 ${
-                      selectedType.id === type.id
-                        ? 'border-teal-500 bg-teal-500/20'
-                        : 'border-gray-700/50 hover:border-gray-600'
-                    }`}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <h3 className="text-xl font-bold text-white mb-2">{type.name}</h3>
-                    <p className="text-gray-400 mb-3">{type.description}</p>
-                    <p className="text-teal-400 font-semibold">{type.duration} minutes</p>
-                  </motion.button>
-                ))}
-              </div>
-
-              <div className="text-center">
-                <motion.button
-                  onClick={handleStart}
-                  disabled={loading}
-                  className="bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-full px-12 py-4 font-bold text-lg hover:shadow-2xl transition-all duration-300 disabled:opacity-50 inline-flex items-center space-x-3"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Play className="w-6 h-6" />
-                  <span>{loading ? 'Preparing...' : 'Begin Session'}</span>
-                </motion.button>
-              </div>
-            </div>
-          </div>
-        ) : showMoodCheck ? (
-          <MoodCheck
-            type={showMoodCheck}
-            onSubmit={showMoodCheck === 'before' ? handleMoodBeforeSubmit : handleMoodAfterSubmit}
-            onCancel={handleReset}
-          />
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-8">
+    if (sessionInProgress) {
+      return (
+        <>
+          <button
+            onClick={() => handleReset(true)}
+            className="absolute top-6 left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Menu</span>
+          </button>
+          <div className="w-full h-full flex flex-col items-center p-8 overflow-y-auto">
             <motion.div
-              className="text-center max-w-2xl"
+              className="text-center max-w-2xl w-full pt-12"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
@@ -220,14 +231,7 @@ export function Meditation() {
 
               <div className="relative w-64 h-64 mx-auto mb-8">
                 <svg className="transform -rotate-90 w-64 h-64">
-                  <circle
-                    cx="128"
-                    cy="128"
-                    r="120"
-                    stroke="rgba(255,255,255,0.1)"
-                    strokeWidth="8"
-                    fill="none"
-                  />
+                  <circle cx="128" cy="128" r="120" stroke="rgba(255,255,255,0.1)" strokeWidth="8" fill="none" />
                   <circle
                     cx="128"
                     cy="128"
@@ -242,7 +246,7 @@ export function Meditation() {
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-6xl font-bold text-white">{formatTime(timeRemaining)}</div>
+                  <div className="text-5xl font-bold text-white">{formatTime(timeRemaining)}</div>
                 </div>
               </div>
 
@@ -260,7 +264,7 @@ export function Meditation() {
                   {isActive ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8" />}
                 </motion.button>
                 <motion.button
-                  onClick={handleReset}
+                  onClick={() => handleReset()}
                   className="bg-gray-700 text-white rounded-full p-6 hover:bg-gray-600 transition-colors"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -275,7 +279,77 @@ export function Meditation() {
               </div>
             </motion.div>
           </div>
-        )}
+        </>
+      );
+    }
+
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="max-w-4xl w-full">
+          <motion.h2
+            className="text-4xl font-bold text-white text-center mb-4"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            Guided Meditation
+          </motion.h2>
+          <p className="text-gray-300 text-center mb-12">Find peace and calm your mind with AI-guided meditation</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {MEDITATION_TYPES.map((type) => (
+              <motion.button
+                key={type.id}
+                onClick={() => {
+                  setSelectedType(type);
+                  setScript('');
+                }}
+                className={`bg-gray-800/80 backdrop-blur-xl border-2 rounded-2xl p-6 text-left transition-all duration-300 ${
+                  selectedType.id === type.id
+                    ? 'border-teal-500 bg-teal-500/20'
+                    : 'border-gray-700/50 hover:border-gray-600'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <h3 className="text-xl font-bold text-white mb-2">{type.name}</h3>
+                <p className="text-gray-400 mb-3">{type.description}</p>
+              </motion.button>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <motion.button
+              onClick={handleStart}
+              disabled={loading}
+              className="bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-full px-12 py-4 font-bold text-lg hover:shadow-2xl transition-all duration-300 disabled:opacity-50 inline-flex items-center space-x-3"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Play className="w-6 h-6" />
+              <span>{loading ? 'Preparing...' : 'Begin Session'}</span>
+            </motion.button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="h-full relative overflow-hidden">
+      <div className="absolute inset-0 z-0">
+        <Canvas>
+          <PerspectiveCamera makeDefault position={[0, 0, 8]} />
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} intensity={0.8} />
+          <pointLight position={[-10, -10, -5]} intensity={0.5} color={selectedType.color} />
+          {sessionInProgress && <BreathingFlower isActive={isActive} color={selectedType.color} progress={progress} />}
+          <WaveBackground color={selectedType.color} opacity={0.2} />
+          <ParticleSystem count={1500} color={selectedType.color} size={0.02} speed={0.2} />
+          <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.1} />
+        </Canvas>
+      </div>
+      <div className="relative z-10 h-full flex flex-col">
+        {renderContent()}
       </div>
     </div>
   );
@@ -339,6 +413,45 @@ function MoodCheck({
             Cancel
           </button>
         </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function DurationPicker({ onSelect, onCancel }: { onSelect: (duration: number) => void; onCancel: () => void; }) {
+  const durations = [1, 5, 10];
+
+  return (
+    <motion.div
+      className="flex-1 flex items-center justify-center p-8"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+    >
+      <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 max-w-lg w-full">
+        <h3 className="text-3xl font-bold text-white text-center mb-8">
+          Choose a duration
+        </h3>
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          {durations.map(duration => (
+            <motion.button
+              key={duration}
+              onClick={() => onSelect(duration)}
+              className="bg-gray-900/50 border-2 border-gray-700 rounded-xl p-6 text-white text-3xl font-bold hover:border-teal-500 hover:bg-teal-500/10 transition-all duration-300 flex flex-col items-center justify-center"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {duration}
+              <span className="text-lg font-medium mt-1">min</span>
+            </motion.button>
+          ))}
+        </div>
+        <button
+          onClick={onCancel}
+          className="w-full bg-gray-700 text-white rounded-xl py-3 font-bold hover:bg-gray-600 transition-all duration-300"
+        >
+          Cancel
+        </button>
       </div>
     </motion.div>
   );

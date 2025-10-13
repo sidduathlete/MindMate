@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion } from 'framer-motion';
-import { Send, AlertCircle } from 'lucide-react';
+import { Send, AlertCircle, Mic } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { sendMessage, detectCrisisKeywords, analyzeSentiment } from '../lib/gemini';
@@ -22,8 +22,51 @@ export function ChatInterface() {
   const [sessionId] = useState(() => crypto.randomUUID());
   const [showCrisisWarning, setShowCrisisWarning] = useState(false);
   const [moodScore, setMoodScore] = useState(5);
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null); // For SpeechRecognition instance
   const { user } = useAuth();
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+
+      recognitionRef.current.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0])
+          .map((result) => result.transcript)
+          .join('');
+        setInput(transcript);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error', event.error);
+      };
+    } else {
+      console.log('Speech recognition not supported');
+    }
+  }, []);
+
+  const handleListen = () => {
+    if (recognitionRef.current) {
+      if (isListening) {
+        recognitionRef.current.stop();
+      } else {
+        recognitionRef.current.start();
+      }
+    }
+  };
 
   useEffect(() => {
     const welcomeMessage: Message = {
@@ -218,6 +261,14 @@ export function ChatInterface() {
               className="flex-1 bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors resize-none"
               rows={3}
             />
+            <button
+              onClick={handleListen}
+              className={`bg-gray-700 text-white rounded-xl px-4 py-3 font-bold hover:bg-gray-600 transition-all duration-300 flex items-center justify-center ${
+                isListening ? 'bg-red-500 hover:bg-red-600' : ''
+              }`}
+            >
+              <Mic className="w-5 h-5" />
+            </button>
             <button
               onClick={handleSend}
               disabled={!input.trim() || loading}

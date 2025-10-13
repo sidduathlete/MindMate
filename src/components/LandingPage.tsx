@@ -37,10 +37,10 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <div className="flex items-center space-x-3">
+          <a href="/" className="flex items-center space-x-3">
             <BrainIcon />
             <span className="text-2xl font-bold text-white">MindMate</span>
-          </div>
+          </a>
           <button
             onClick={onGetStarted}
             className="px-6 py-2 bg-white text-gray-900 rounded-full font-semibold hover:bg-teal-400 transition-all duration-300"
