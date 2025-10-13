@@ -274,7 +274,7 @@ export function Dashboard() {
 }
 
 function HomeView({ user, onNavigate }: { user: any, onNavigate: (view: View) => void }) {
-  const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || 'User';
+  const displayName = user?.user_metadata?.username || 'User';
 
   return (
     <div className="max-w-6xl mx-auto">

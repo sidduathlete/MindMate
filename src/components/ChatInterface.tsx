@@ -27,11 +27,13 @@ export function ChatInterface({ onNavigate }: { onNavigate: (view: string) => vo
   const recognitionRef = useRef<any>(null); // For SpeechRecognition instance
   const { user } = useAuth();
 
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
+      recognitionRef.current.continuous = false; // Stop automatically when user pauses
       recognitionRef.current.interimResults = true;
 
       recognitionRef.current.onstart = () => {
@@ -40,6 +42,15 @@ export function ChatInterface({ onNavigate }: { onNavigate: (view: string) => vo
 
       recognitionRef.current.onend = () => {
         setIsListening(false);
+        setIsSpeaking(false);
+      };
+
+      recognitionRef.current.onspeechstart = () => {
+        setIsSpeaking(true);
+      };
+
+      recognitionRef.current.onspeechend = () => {
+        setIsSpeaking(false);
       };
 
       recognitionRef.current.onresult = (event: any) => {
@@ -52,6 +63,8 @@ export function ChatInterface({ onNavigate }: { onNavigate: (view: string) => vo
 
       recognitionRef.current.onerror = (event: any) => {
         console.error('Speech recognition error', event.error);
+        setIsListening(false);
+        setIsSpeaking(false);
       };
     } else {
       console.log('Speech recognition not supported');
@@ -59,12 +72,9 @@ export function ChatInterface({ onNavigate }: { onNavigate: (view: string) => vo
   }, []);
 
   const handleListen = () => {
-    if (recognitionRef.current) {
-      if (isListening) {
-        recognitionRef.current.stop();
-      } else {
-        recognitionRef.current.start();
-      }
+    if (recognitionRef.current && !isListening) {
+      setInput(''); // Clear input before starting new recording
+      recognitionRef.current.start();
     }
   };
 
@@ -269,7 +279,7 @@ export function ChatInterface({ onNavigate }: { onNavigate: (view: string) => vo
               onClick={handleListen}
               className={`bg-gray-700 text-white rounded-xl px-4 py-3 font-bold hover:bg-gray-600 transition-all duration-300 flex items-center justify-center ${
                 isListening ? 'bg-red-500 hover:bg-red-600' : ''
-              }`}
+              } ${isSpeaking ? 'animate-pulse' : ''}`}
             >
               <Mic className="w-5 h-5" />
             </button>
