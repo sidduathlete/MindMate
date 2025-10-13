@@ -16,6 +16,19 @@ export function Profile({ user, journalCount, setUser, onNavigate }: { user: any
     }
     setError('');
 
+    // Check if username is already taken by another user
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('username', newUsername)
+      .not('id', 'eq', user.id)
+      .single();
+
+    if (existingUser) {
+      setError('This username is already taken. Please choose another.');
+      return;
+    }
+
     // Update the public users table first
     const { error: publicError } = await supabase
       .from('users')

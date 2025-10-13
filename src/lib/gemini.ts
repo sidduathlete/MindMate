@@ -144,7 +144,7 @@ export async function generateAffirmation(mood: string): Promise<string> {
 export async function generateMeditationScript(type: string, duration: number): Promise<string> {
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
-    const prompt = `Generate a ${duration}-minute ${type} meditation script with a calm introduction, breathing focus, and peaceful ending.`;
+    const prompt = `Generate a ${duration}-minute ${type} meditation script. The script should have a calm introduction, a section focusing on the breath, and a peaceful conclusion. IMPORTANT: Do not include any conversational text or introduction. The response should start *directly* with the script content. Format the title of the meditation with a '###' prefix, for example: '### 5-Minute Breathing Meditation'.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();

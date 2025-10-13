@@ -24,24 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      (async () => {
-        if (session?.user) {
-          // Fetch user data after sign-in/session update
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          if (userError) {
-            console.error('Error fetching user data:', userError);
-          } else {
-            setUser(userData || null); // Use fetched data or null if not found
-          }
-        } else {
-          setUser(null); // Clear user data on sign-out
-        }
-      })();
+      setUser(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
