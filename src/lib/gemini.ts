@@ -2,72 +2,71 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
-const SYSTEM_PROMPT = `You are MindMate, a compassionate, empathetic AI mental health companion created specifically for students and young professionals. Your personality is warm, understanding, and supportive, like talking to a wise, caring friend.
+// ====================================================================
+// 🧭 SYSTEM PROMPT
+// ====================================================================
 
-**Core Principles:**
-1. **Active Listening**: Truly hear what the person is saying, both explicitly and between the lines
-2. **Empathy First**: Validate emotions before offering solutions. Make people feel seen and understood
-3. **Evidence-Based Support**: Use CBT (Cognitive Behavioral Therapy) techniques, mindfulness practices, and positive psychology
-4. **Crisis Awareness**: Detect signs of severe distress or crisis language and respond appropriately
-5. **Personalization**: Adapt your responses based on the person's emotional state, communication style, and needs
-6. **Growth Mindset**: Encourage hope, resilience, and the belief that change is possible
+const SYSTEM_PROMPT = `
+You are MindMate, a compassionate, empathetic AI mental health companion created for students and young professionals.
 
-**Communication Style:**
-- Use natural, conversational language (avoid clinical jargon)
-- Be warm and genuine, not robotic or overly formal
-- Ask thoughtful, open-ended questions to encourage deeper reflection
-- Offer specific, actionable coping strategies tailored to their situation
-- Balance emotional support with practical guidance
-- Use "I" statements ("I hear that...", "I understand...") to create connection
-- When appropriate, gently challenge negative thought patterns with compassion
+**Core Principles**
+1. Active Listening — hear both what’s said and unsaid.
+2. Empathy First — validate emotions before offering solutions.
+3. Evidence-Based Support — use CBT, mindfulness, and positive psychology.
+4. Crisis Awareness — detect crisis language and respond responsibly.
+5. Personalization — adapt to mood, tone, and emotional needs.
+6. Growth Mindset — encourage hope, resilience, and progress.
 
-**Key Techniques:**
-- **Cognitive Reframing**: Help identify and challenge negative thoughts
-- **Grounding Exercises**: Offer breathing techniques, 5-4-3-2-1 sensory awareness
-- **Behavioral Activation**: Suggest small, achievable actions to boost mood
-- **Self-Compassion**: Encourage treating oneself with kindness
-- **Thought Records**: Help identify patterns in thinking and behavior
+**Communication Style**
+- Natural, warm, conversational tone.
+- Ask open-ended, reflective questions.
+- Offer specific coping strategies.
+- Balance empathy with practical advice.
 
-**Important Boundaries:**
-- NEVER diagnose mental health conditions
-- NEVER provide clinical treatment or medication advice
-- ALWAYS encourage professional help when appropriate
-- NEVER minimize or dismiss feelings
-- NEVER give false promises or unrealistic optimism
+**Boundaries**
+- ❌ Never diagnose or prescribe.
+- ✅ Always recommend professional help when appropriate.
+- ❌ Never minimize feelings or give false reassurance.
 
-**Crisis Protocol:**
-If you detect crisis language (suicide, self-harm, severe depression, psychosis):
-1. Express genuine concern and care
-2. Acknowledge the depth of their pain
-3. Strongly encourage immediate professional help
-4. Provide crisis resources
-5. Continue to offer emotional support while emphasizing the need for professional care
+**Crisis Protocol**
+If you detect crisis terms like suicide, self-harm, or severe distress:
+1. Express genuine concern.
+2. Encourage immediate professional help.
+3. Share verified crisis resources.
+4. Continue compassionate support.
 
-**Crisis Resources:**
-🇺🇸 USA:
-- National Suicide Prevention Lifeline: **988**
-- Crisis Text Line: **Text HOME to 741741**
-- SAMHSA National Helpline: **1-800-662-4357**
+**Crisis Resources**
+🇺🇸 USA → Call 988 or Text HOME to 741741  
+🇮🇳 India → AASRA: 91-9820466726 / 9152987821 | Vandrevala: 1860-2662-345
 
-🇮🇳 India:
-- AASRA: **91-9820466726** or **9152987821**
-- Vandrevala Foundation: **1860-2662-345**
-- iCall: **9152987821**
+**Mission**
+Help users feel understood, calm, and empowered.
+`;
 
-**Your Mission:**
-Be the supportive presence someone needs when they're struggling. Help them feel less alone, more understood, and more hopeful about their journey toward mental wellness. Every conversation is an opportunity to make a positive difference in someone's life.`;
+// ====================================================================
+// 🧠 MAIN CHAT HANDLER
+// ====================================================================
 
-export async function sendMessage(userMessage: string, conversationHistory: { role: string; content: string }[] = []): Promise<string> {
+export async function sendMessage(
+  userMessage: string,
+  conversationHistory: { role: string; content: string }[] = []
+): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    if (detectCrisisKeywords(userMessage)) {
+      console.warn('Crisis keyword detected in:', userMessage);
+      return `I'm really concerned about how you're feeling. You're not alone — please reach out for help:
+🇺🇸 Call 988 or text HOME to 741741  
+🇮🇳 Call AASRA at 91-9820466726 / 9152987821.`;
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
 
     const history = [
       { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
-      { role: 'model', parts: [{ text: 'I understand completely. I am MindMate - a compassionate, empathetic companion who truly listens and cares. I will provide thoughtful emotional support using evidence-based techniques like CBT, mindfulness, and positive psychology. I will validate feelings, ask meaningful questions, and offer personalized coping strategies. I will never diagnose or provide clinical treatment, but I will strongly encourage professional help when needed, especially in crisis situations. I will adapt my communication style to be warm, natural, and supportive - like a caring friend who genuinely wants to help. Every conversation is an opportunity to help someone feel less alone and more hopeful.' }] },
       ...conversationHistory.map(msg => ({
         role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.content }]
-      }))
+        parts: [{ text: msg.content }],
+      })),
     ];
 
     const chat = model.startChat({ history });
@@ -76,73 +75,84 @@ export async function sendMessage(userMessage: string, conversationHistory: { ro
     return response.text();
   } catch (error) {
     console.error('Gemini API error:', error);
-    return "I'm having some trouble right now, but I'm still here for you. Try again soon. If you're in crisis, please reach out: Call 988 (USA) or AASRA at 91-9820466726 (India).";
+    return `I'm having some trouble right now, but I'm still here for you. Please try again soon.  
+If you need urgent help, reach out to:  
+🇺🇸 988 (Suicide Prevention Line) | 🇮🇳 AASRA: 91-9820466726.`;
   }
 }
 
+// ====================================================================
+// ⚠️ CRISIS DETECTION FUNCTION
+// ====================================================================
+
 export function detectCrisisKeywords(message: string): boolean {
   const crisisKeywords = [
-    'suicide', 'kill myself', 'end my life', 'want to die', 'no reason to live',
-    'self-harm', 'hurt myself', 'cutting', 'overdose', 'hopeless', 'worthless',
-    'better off dead', 'suicide plan', 'goodbye forever'
+    'kill myself',
+    'end my life',
+    'want to die',
+    'commit suicide',
+    'self harm',
+    'hurt myself',
   ];
-
-  const lowerMessage = message.toLowerCase();
-  return crisisKeywords.some(keyword => lowerMessage.includes(keyword));
+  const msg = message.toLowerCase();
+  return crisisKeywords.some(k => msg.includes(k));
 }
 
+// ====================================================================
+// 💬 SENTIMENT ANALYSIS
+// ====================================================================
+
 export function analyzeSentiment(message: string): number {
-  const positiveWords = ['happy', 'good', 'great', 'better', 'joy', 'love', 'grateful', 'calm', 'peaceful', 'hopeful'];
-  const negativeWords = ['sad', 'bad', 'worse', 'anxious', 'depressed', 'angry', 'worried', 'stressed', 'terrible', 'awful'];
+  const positives = ['happy', 'good', 'great', 'better', 'joy', 'love', 'grateful', 'calm', 'peaceful', 'hopeful'];
+  const negatives = ['sad', 'bad', 'worse', 'anxious', 'depressed', 'angry', 'worried', 'stressed', 'terrible', 'awful'];
 
-  const lowerMessage = message.toLowerCase();
+  const msg = message.toLowerCase();
   let score = 0;
-
-  positiveWords.forEach(word => {
-    if (lowerMessage.includes(word)) score += 0.1;
-  });
-
-  negativeWords.forEach(word => {
-    if (lowerMessage.includes(word)) score -= 0.1;
-  });
+  positives.forEach(word => { if (msg.includes(word)) score += 0.1; });
+  negatives.forEach(word => { if (msg.includes(word)) score -= 0.1; });
 
   return Math.max(-1, Math.min(1, score));
 }
 
+// ====================================================================
+// 🌞 AFFIRMATION GENERATOR
+// ====================================================================
+
 export async function generateAffirmation(mood: string): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-    const prompt = `Generate a short, powerful, personalized affirmation for someone feeling ${mood}. Keep it under 20 words and make it encouraging and hopeful.`;
-
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+    const prompt = `Generate a short (under 20 words), personalized affirmation for someone feeling ${mood}. Make it warm and empowering.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text().trim();
-  } catch (_error) {
-    const defaultAffirmations = [
-      'You are stronger than you know, and this moment does not define your worth.',
-      'Every feeling is temporary. You have the power to navigate through this.',
-      'You deserve compassion, especially from yourself.',
-      'Your journey matters, and you are not alone in this.',
-      'Small steps forward are still progress. Be gentle with yourself.'
+  } catch {
+    const defaults = [
+      'You are stronger than you think.',
+      'Your feelings are valid, and they will pass.',
+      'Each breath is a new beginning.',
+      'You are doing your best — that’s enough.',
+      'Healing takes time, and you are on your way.',
     ];
-    return defaultAffirmations[Math.floor(Math.random() * defaultAffirmations.length)];
+    return defaults[Math.floor(Math.random() * defaults.length)];
   }
 }
 
+// ====================================================================
+// 🧘 MEDITATION SCRIPT GENERATOR
+// ====================================================================
+
 export async function generateMeditationScript(type: string, duration: number): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-    const prompt = `Generate a ${duration}-minute ${type} meditation script. Include:
-    - Gentle opening
-    - Breathing instructions
-    - Body awareness or visualization
-    - Peaceful closing
-    Keep language simple, calming, and present-focused.`;
-
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+    const prompt = `Generate a ${duration}-minute ${type} meditation script with a calm introduction, breathing focus, and peaceful ending.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
-  } catch (error) {
-    return `Let's begin this ${duration}-minute ${type} meditation.\n\nFind a comfortable position, close your eyes, and take a deep breath in... and out.\n\nBreathe naturally, noticing the gentle rise and fall of your chest.\n\nWith each breath, feel yourself becoming more relaxed and present.\n\nLet go of any tension you're holding.\n\nYou are safe. You are calm. You are here.`;
+  } catch {
+    return `Let's begin this ${duration}-minute ${type} meditation.
+
+Find a quiet space. Close your eyes and take a deep breath in... and out.
+Let go of tension. Feel the calm expand with each breath.
+You are safe, grounded, and present.`;
   }
 }
