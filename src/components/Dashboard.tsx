@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Heart, BookOpen, Brain, LogOut, Home } from 'lucide-react';
+import { MessageCircle, Heart, BookOpen, Brain, LogOut, Home, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 import { ChatInterface } from './ChatInterface';
 import { MoodTracker } from './MoodTracker';
 import { Journal } from './Journal';
@@ -12,22 +13,42 @@ import { ParticleSystem } from './three/ParticleSystem';
 import { FloatingOrbs } from './three/FloatingOrbs';
 import { BrainIcon } from './BrainIcon';
 
-type View = 'home' | 'chat' | 'mood' | 'journal' | 'meditation';
+import { Profile } from './Profile';
+
+type View = 'home' | 'chat' | 'mood' | 'journal' | 'meditation' | 'profile';
 
 export function Dashboard() {
   const [currentView, setCurrentView] = useState<View>('home');
-  const { signOut } = useAuth();
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  const { user, signOut, setUser } = useAuth();
+  const [journalCount, setJournalCount] = useState(0);
+
+  const fetchJournalCount = useCallback(async () => {
+    if (!user) return;
+    const { count, error } = await supabase
+      .from('journal_entries')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+
+    if (!error && count !== null) {
+      setJournalCount(count);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchJournalCount();
+  }, [fetchJournalCount, currentView]);
 
   const handleSignOut = async () => {
     await signOut();
   };
 
   const navItems = [
-    { id: 'home' as View, icon: Home, label: 'Home', color: 'teal' },
-    { id: 'chat' as View, icon: MessageCircle, label: 'Chat', color: 'blue' },
-    { id: 'mood' as View, icon: Heart, label: 'Mood', color: 'pink' },
-    { id: 'journal' as View, icon: BookOpen, label: 'Journal', color: 'purple' },
-    { id: 'meditation' as View, icon: Brain, label: 'Meditate', color: 'green' },
+    { id: 'home' as View, icon: Home, label: 'Home', color: 'text-gray-300' },
+    { id: 'chat' as View, icon: MessageCircle, label: 'Chatbot', color: 'text-blue-400' },
+    { id: 'mood' as View, icon: Heart, label: 'Mood Tracker', color: 'text-pink-400' },
+    { id: 'journal' as View, icon: BookOpen, label: 'Journal', color: 'text-purple-400' },
+    { id: 'meditation' as View, icon: Brain, label: 'Meditate', color: 'text-green-400' },
   ];
 
   return (
@@ -46,42 +67,133 @@ export function Dashboard() {
         </div>
       )}
       <motion.aside
-        className="relative z-10 w-20 bg-gray-900/50 backdrop-blur-xl border-r border-gray-700/50 flex flex-col items-center py-6 space-y-6"
-        initial={{ x: -100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
+        className="relative z-10 bg-gray-900/50 backdrop-blur-xl border-r border-gray-700/50 flex flex-col py-6 space-y-6 overflow-hidden"
+        initial={{ x: -256, opacity: 0 }}
+        animate={{ x: 0, opacity: 1, width: isSidebarExpanded ? '16rem' : '5rem' }}
+        transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+        onMouseEnter={() => setIsSidebarExpanded(true)}
+        onMouseLeave={() => setIsSidebarExpanded(false)}
       >
-        <button onClick={() => setCurrentView('home')} className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-700/50 transition-colors">
-          <BrainIcon />
-        </button>
+        <div className="px-4 w-full">
+          <button onClick={() => setCurrentView('home')} className="w-full h-12 flex items-center justify-center rounded-full hover:bg-gray-700/50 transition-colors">
+            <BrainIcon />
+            <AnimatePresence>
+              {isSidebarExpanded && (
+                <motion.span 
+                  className="ml-3 font-bold text-xl text-white whitespace-nowrap"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                >
+                  MindMate
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        </div>
 
-        <div className="flex-1 flex flex-col space-y-4">
+        <div className="flex-1 flex flex-col space-y-2 px-4 w-full">
           {navItems.map((item) => (
             <motion.button
               key={item.id}
               onClick={() => setCurrentView(item.id)}
-              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
+              className={`w-full h-12 rounded-xl flex items-center transition-all duration-300 px-3.5 ${
                 currentView === item.id
                   ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/50'
-                  : 'bg-gray-800/50 text-gray-400 hover:text-white hover:bg-gray-700/50'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
               }`}
-              whileHover={{ scale: 1.1 }}
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <item.icon className="w-6 h-6" />
+              <item.icon className="w-6 h-6 flex-shrink-0" />
+              <AnimatePresence>
+                {isSidebarExpanded && (
+                  <motion.span 
+                    className={`ml-4 font-semibold whitespace-nowrap ${currentView !== item.id && item.color}`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
+                    transition={{ duration: 0.3, delay: 0.2 }}
+                  >
+                    {item.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </motion.button>
           ))}
         </div>
 
-        <button
-          onClick={handleSignOut}
-          className="w-12 h-12 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all duration-300 flex items-center justify-center"
-        >
-          <LogOut className="w-6 h-6" />
-        </button>
+        <div className="mt-auto flex flex-col space-y-3 px-4 w-full">
+          <button
+            onClick={() => setCurrentView('profile')}
+            className={`w-full h-12 rounded-xl flex items-center transition-all duration-300 px-3.5 ${
+              currentView === 'profile'
+                ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/50'
+                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+            }`}
+          >
+            <User className="w-6 h-6 flex-shrink-0" />
+            <AnimatePresence>
+              {isSidebarExpanded && (
+                <motion.span 
+                  className="ml-4 font-semibold whitespace-nowrap"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                >
+                  Profile
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="w-full h-12 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all duration-300 flex items-center px-3.5"
+          >
+            <LogOut className="w-6 h-6 flex-shrink-0" />
+            <AnimatePresence>
+              {isSidebarExpanded && (
+                <motion.span 
+                  className="ml-4 font-semibold whitespace-nowrap"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                >
+                  Logout
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        </div>
       </motion.aside>
 
       <main className="relative z-10 flex-1 overflow-hidden">
+        <div className="absolute top-6 right-6 z-20">
+          <motion.button 
+            onClick={() => setCurrentView('profile')} 
+            className="relative w-12 h-12 bg-gray-800/70 backdrop-blur-xl border border-gray-700/50 rounded-full flex items-center justify-center text-gray-300 hover:text-white hover:border-teal-500 transition-all"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <User className="w-6 h-6" />
+            <motion.div
+              className="absolute inset-0 bg-teal-400 rounded-full blur-md"
+              animate={{
+                opacity: [0.1, 0.3, 0.1],
+                scale: [0.8, 1.2, 0.8],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          </motion.button>
+        </div>
+
         <AnimatePresence mode="wait">
           {currentView === 'home' && (
             <motion.div
@@ -92,7 +204,7 @@ export function Dashboard() {
               transition={{ duration: 0.3 }}
               className="h-full overflow-auto p-8"
             >
-              <HomeView onNavigate={setCurrentView} />
+              <HomeView user={user} onNavigate={setCurrentView} />
             </motion.div>
           )}
           {currentView === 'chat' && (
@@ -104,7 +216,7 @@ export function Dashboard() {
               transition={{ duration: 0.3 }}
               className="h-full"
             >
-              <ChatInterface />
+              <ChatInterface onNavigate={setCurrentView} />
             </motion.div>
           )}
           {currentView === 'mood' && (
@@ -116,7 +228,7 @@ export function Dashboard() {
               transition={{ duration: 0.3 }}
               className="h-full"
             >
-              <MoodTracker />
+              <MoodTracker onNavigate={setCurrentView} />
             </motion.div>
           )}
           {currentView === 'journal' && (
@@ -128,7 +240,7 @@ export function Dashboard() {
               transition={{ duration: 0.3 }}
               className="h-full"
             >
-              <Journal />
+              <Journal onNavigate={setCurrentView} />
             </motion.div>
           )}
           {currentView === 'meditation' && (
@@ -140,7 +252,19 @@ export function Dashboard() {
               transition={{ duration: 0.3 }}
               className="h-full"
             >
-              <Meditation />
+              <Meditation onNavigate={setCurrentView} />
+            </motion.div>
+          )}
+          {currentView === 'profile' && (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="h-full"
+            >
+              <Profile user={user} journalCount={journalCount} setUser={setUser} onNavigate={setCurrentView} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -149,7 +273,9 @@ export function Dashboard() {
   );
 }
 
-function HomeView({ onNavigate }: { onNavigate: (view: View) => void }) {
+function HomeView({ user, onNavigate }: { user: any, onNavigate: (view: View) => void }) {
+  const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || 'User';
+
   return (
     <div className="max-w-6xl mx-auto">
       <motion.h1
@@ -157,7 +283,7 @@ function HomeView({ onNavigate }: { onNavigate: (view: View) => void }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        Welcome to Your Safe Space
+        Welcome to Your Safe Space, {displayName}
       </motion.h1>
       <p className="text-gray-400 mb-12">How are you feeling today?</p>
 
@@ -244,3 +370,5 @@ function HomeView({ onNavigate }: { onNavigate: (view: View) => void }) {
     </div>
   );
 }
+
+

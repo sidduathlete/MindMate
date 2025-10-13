@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion } from 'framer-motion';
-import { TrendingUp, Calendar, Activity } from 'lucide-react';
+import { TrendingUp, Calendar, Activity, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, MoodEntry } from '../lib/supabase';
 import { Card3D } from './Card3D';
@@ -22,7 +22,7 @@ const MOOD_OPTIONS = [
   { label: 'Very Low', score: 1, emoji: '😔', color: '#dc2626' },
 ];
 
-export function MoodTracker() {
+export function MoodTracker({ onNavigate }: { onNavigate: (view: string) => void }) {
   const [selectedMood, setSelectedMood] = useState<typeof MOOD_OPTIONS[0] | null>(null);
   const [energyLevel, setEnergyLevel] = useState(5);
   const [stressLevel, setStressLevel] = useState(5);
@@ -90,6 +90,10 @@ export function MoodTracker() {
 
   return (
     <div className="h-full overflow-auto relative">
+      <button onClick={() => onNavigate('home')} className="absolute top-6 left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2">
+        <ArrowLeft className="w-5 h-5" />
+        <span>Back to Home</span>
+      </button>
       <div className="absolute inset-0 z-0 opacity-20">
         <Canvas>
           <PerspectiveCamera makeDefault position={[0, 0, 5]} />
@@ -100,7 +104,7 @@ export function MoodTracker() {
         </Canvas>
       </div>
 
-      <div className="relative z-10 p-8">
+      <div className="relative z-10 p-8 pt-20">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-white mb-2">Mood Tracker</h2>
           <p className="text-gray-400 mb-8">Track your emotional wellness journey</p>

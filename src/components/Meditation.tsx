@@ -41,7 +41,7 @@ const MEDITATION_TYPES = [
   },
 ];
 
-export function Meditation() {
+export function Meditation({ onNavigate }: { onNavigate: (view: string) => void; }) {
   const [selectedType, setSelectedType] = useState(MEDITATION_TYPES[0]);
   const [isActive, setIsActive] = useState(false);
   const [sessionInProgress, setSessionInProgress] = useState(false);
@@ -55,10 +55,24 @@ export function Meditation() {
   const [showDurationPicker, setShowDurationPicker] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState(5);
   const intervalRef = useRef<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
+    // Initialize audio
+    audioRef.current = new Audio('/Audio Tracks/Deep_Meditation_-_David_Fesliyan.mp3');
+    audioRef.current.loop = true;
+
+    return () => {
+      // Cleanup audio on component unmount
+      audioRef.current?.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
     if (isActive) {
+      audioRef.current?.play();
       intervalRef.current = window.setInterval(() => {
         setTimeRemaining((prev) => {
           if (prev <= 1) {
@@ -70,6 +84,7 @@ export function Meditation() {
         });
       }, 1000);
     } else {
+      audioRef.current?.pause();
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
@@ -172,6 +187,12 @@ export function Meditation() {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
+    // Stop and rewind audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
     setTimeRemaining(selectedDuration * 60);
     if (isEnd) {
       setScript('');
@@ -215,15 +236,15 @@ export function Meditation() {
       return (
         <>
           <button
-            onClick={() => handleReset(true)}
+            onClick={() => { handleReset(true); onNavigate('home'); }}
             className="absolute top-6 left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>Back to Menu</span>
+            <span>Back to Home</span>
           </button>
           <div className="w-full h-full flex flex-col items-center p-8 overflow-y-auto">
             <motion.div
-              className="text-center max-w-2xl w-full pt-12"
+              className="text-center max-w-2xl w-full pt-20"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
@@ -273,9 +294,9 @@ export function Meditation() {
                 </motion.button>
               </div>
 
-              <div className="mt-8 flex items-center justify-center space-x-2 text-gray-400">
-                <Volume2 className="w-5 h-5" />
-                <p className="text-sm">Find a quiet space and use headphones for the best experience</p>
+              <div className="mt-8 flex items-center justify-center space-x-3 bg-gray-800/50 border border-teal-500/20 rounded-full px-4 py-2">
+                <Volume2 className="w-5 h-5 text-teal-400" />
+                <p className="text-sm text-teal-200 font-medium">Plug in headphones for best experience</p>
               </div>
             </motion.div>
           </div>
@@ -293,7 +314,12 @@ export function Meditation() {
           >
             Guided Meditation
           </motion.h2>
-          <p className="text-gray-300 text-center mb-12">Find peace and calm your mind with AI-guided meditation</p>
+          <p className="text-gray-300 text-center mb-8">Find peace and calm your mind with AI-guided meditation</p>
+
+          <div className="flex items-center justify-center space-x-3 bg-gray-800/50 border border-teal-500/20 rounded-full px-4 py-2 mb-8 max-w-md mx-auto">
+            <Volume2 className="w-5 h-5 text-teal-400" />
+            <p className="text-sm text-teal-200 font-medium">Plug in headphones for best experience</p>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {MEDITATION_TYPES.map((type) => (

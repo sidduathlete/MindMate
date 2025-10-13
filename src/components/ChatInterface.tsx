@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { motion } from 'framer-motion';
-import { Send, AlertCircle, Mic } from 'lucide-react';
+import { Send, AlertCircle, Mic, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { sendMessage, detectCrisisKeywords, analyzeSentiment } from '../lib/gemini';
@@ -15,7 +15,7 @@ interface Message {
   timestamp: Date;
 }
 
-export function ChatInterface() {
+export function ChatInterface({ onNavigate }: { onNavigate: (view: string) => void }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -157,6 +157,10 @@ export function ChatInterface() {
 
   return (
     <div className="h-full flex flex-col relative">
+      <button onClick={() => onNavigate('home')} className="absolute top-6 left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2">
+        <ArrowLeft className="w-5 h-5" />
+        <span>Back to Home</span>
+      </button>
       <div className="absolute inset-0 z-0 opacity-30">
         <Canvas>
           <PerspectiveCamera makeDefault position={[0, 0, 5]} />
@@ -168,7 +172,7 @@ export function ChatInterface() {
         </Canvas>
       </div>
 
-      <div className="relative z-10 flex flex-col h-full">
+      <div className="relative z-10 flex flex-col h-full pt-16">
         <div className="bg-gray-900/80 backdrop-blur-xl border-b border-gray-700/50 p-6">
           <h2 className="text-2xl font-bold text-white">Your Companion</h2>
           <p className="text-gray-400 text-sm">Safe, confidential, always here for you</p>

@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Plus, Edit, Trash2 } from 'lucide-react';
+import { BookOpen, Plus, Edit, Trash2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, JournalEntry } from '../lib/supabase';
 import { Card3D } from './Card3D';
 
-export function Journal() {
+export function Journal({ onNavigate }: { onNavigate: (view: string) => void }) {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
@@ -102,8 +102,12 @@ export function Journal() {
   };
 
   return (
-    <div className="h-full overflow-auto p-8 bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
-      <div className="max-w-4xl mx-auto">
+    <div className="h-full overflow-auto p-8 bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 relative">
+      <button onClick={() => onNavigate('home')} className="absolute top-6 left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2">
+        <ArrowLeft className="w-5 h-5" />
+        <span>Back to Home</span>
+      </button>
+      <div className="max-w-4xl mx-auto pt-16">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-3xl font-bold text-white mb-2">Daily Journal</h2>
