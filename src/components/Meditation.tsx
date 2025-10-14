@@ -239,6 +239,27 @@ export function Meditation({ onNavigate }: { onNavigate: (view: string) => void;
     if (sessionInProgress) {
       return (
         <>
+          <style>
+            {`
+              .custom-scrollbar::-webkit-scrollbar {
+                width: 8px;
+              }
+              .custom-scrollbar::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+              }
+              .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: #14b8a6;
+                border-radius: 10px;
+              }
+              .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                background: #0d9488;
+              }
+              .timer-circle {
+                transform: rotate(-90deg);
+              }
+            `}
+          </style>
           <button
             onClick={() => { handleReset(true); }}
             className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2"
@@ -255,7 +276,7 @@ export function Meditation({ onNavigate }: { onNavigate: (view: string) => void;
               <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">{selectedType.name}</h3>
 
               <div className="relative w-48 h-48 sm:w-64 sm:h-64 mx-auto mb-6 sm:mb-8">
-                <svg className="transform -rotate-90 w-full h-full">
+                <svg className="timer-circle w-full h-full">
                   <circle cx="50%" cy="50%" r="calc(50% - 8px)" stroke="rgba(255,255,255,0.1)" strokeWidth="8" fill="none" />
                   <circle
                     cx="50%"
@@ -275,7 +296,7 @@ export function Meditation({ onNavigate }: { onNavigate: (view: string) => void;
                 </div>
               </div>
 
-              <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 max-h-32 sm:max-h-48 overflow-y-auto">
+              <div className="custom-scrollbar bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 max-h-32 sm:max-h-48 overflow-y-auto">
                 <p className="text-gray-300 leading-relaxed whitespace-pre-wrap text-sm sm:text-base">{script}</p>
               </div>
 
