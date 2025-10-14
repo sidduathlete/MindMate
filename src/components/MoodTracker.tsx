@@ -90,9 +90,9 @@ export function MoodTracker({ onNavigate }: { onNavigate: (view: string) => void
 
   return (
     <div className="h-full overflow-auto relative">
-      <button onClick={() => onNavigate('home')} className="absolute top-6 left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2">
+      <button onClick={() => onNavigate('home')} className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2">
         <ArrowLeft className="w-5 h-5" />
-        <span>Back to Home</span>
+        <span className="hidden sm:inline">Back to Home</span>
       </button>
       <div className="absolute inset-0 z-0 opacity-20">
         <Canvas>
@@ -104,46 +104,46 @@ export function MoodTracker({ onNavigate }: { onNavigate: (view: string) => void
         </Canvas>
       </div>
 
-      <div className="relative z-10 p-8 pt-20">
+      <div className="relative z-10 p-4 sm:p-8 pt-16 sm:pt-20">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-white mb-2">Mood Tracker</h2>
-          <p className="text-gray-400 mb-8">Track your emotional wellness journey</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Mood Tracker</h2>
+          <p className="text-gray-400 mb-6 sm:mb-8">Track your emotional wellness journey</p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <Card3D glowColor="rgba(74, 222, 128, 0.4)">
-              <div className="bg-gray-800/80 backdrop-blur-xl border border-teal-500/20 rounded-2xl p-6">
+              <div className="bg-gray-800/80 backdrop-blur-xl border border-teal-500/20 rounded-2xl p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-400">7-Day Average</span>
+                  <span className="text-gray-400 text-sm">7-Day Avg.</span>
                   <TrendingUp className="w-5 h-5 text-teal-400" />
                 </div>
-                <p className="text-4xl font-bold text-white">{averageMood}/10</p>
-                <p className="text-sm text-gray-400 mt-2">
+                <p className="text-3xl sm:text-4xl font-bold text-white">{averageMood}/10</p>
+                <p className="text-xs sm:text-sm text-gray-400 mt-2">
                   {averageMood >= 7 ? 'Doing great!' : averageMood >= 4 ? 'Hanging in there' : 'Need support'}
                 </p>
               </div>
             </Card3D>
 
             <Card3D glowColor="rgba(20, 184, 166, 0.4)">
-              <div className="bg-gray-800/80 backdrop-blur-xl border border-blue-500/20 rounded-2xl p-6">
+              <div className="bg-gray-800/80 backdrop-blur-xl border border-blue-500/20 rounded-2xl p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-400">Total Entries</span>
+                  <span className="text-gray-400 text-sm">Total Entries</span>
                   <Calendar className="w-5 h-5 text-blue-400" />
                 </div>
-                <p className="text-4xl font-bold text-white">{moodHistory.length}</p>
-                <p className="text-sm text-gray-400 mt-2">Keep tracking daily</p>
+                <p className="text-3xl sm:text-4xl font-bold text-white">{moodHistory.length}</p>
+                <p className="text-xs sm:text-sm text-gray-400 mt-2">Keep tracking daily</p>
               </div>
             </Card3D>
 
             <Card3D glowColor="rgba(16, 185, 129, 0.4)">
-              <div className="bg-gray-800/80 backdrop-blur-xl border border-emerald-500/20 rounded-2xl p-6">
+              <div className="bg-gray-800/80 backdrop-blur-xl border border-emerald-500/20 rounded-2xl p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-400">Current Mood</span>
+                  <span className="text-gray-400 text-sm">Current Mood</span>
                   <Activity className="w-5 h-5 text-emerald-400" />
                 </div>
-                <p className="text-4xl font-bold text-white">
+                <p className="text-3xl sm:text-4xl font-bold text-white">
                   {moodHistory.length > 0 ? `${moodHistory[0].mood_score}/10` : '-'}
                 </p>
-                <p className="text-sm text-gray-400 mt-2">
+                <p className="text-xs sm:text-sm text-gray-400 mt-2">
                   {moodHistory.length > 0 ? moodHistory[0].mood_label : 'Not set'}
                 </p>
               </div>
@@ -178,18 +178,18 @@ export function MoodTracker({ onNavigate }: { onNavigate: (view: string) => void
             </motion.button>
           ) : (
             <motion.div
-              className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8"
+              className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-4 sm:p-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <h3 className="text-2xl font-bold text-white mb-6">How are you feeling?</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">How are you feeling?</h3>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-6">
                 {MOOD_OPTIONS.map((mood) => (
                   <motion.button
                     key={mood.label}
                     onClick={() => setSelectedMood(mood)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                    className={`p-3 rounded-xl border-2 transition-all duration-300 ${
                       selectedMood?.label === mood.label
                         ? 'border-teal-500 bg-teal-500/20'
                         : 'border-gray-700 bg-gray-900/50 hover:border-gray-600'
@@ -197,15 +197,15 @@ export function MoodTracker({ onNavigate }: { onNavigate: (view: string) => void
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <div className="text-4xl mb-2">{mood.emoji}</div>
-                    <p className="text-white font-medium">{mood.label}</p>
+                    <div className="text-3xl sm:text-4xl mb-2">{mood.emoji}</div>
+                    <p className="text-white font-medium text-sm sm:text-base">{mood.label}</p>
                   </motion.button>
                 ))}
               </div>
 
               <div className="space-y-6">
                 <div>
-                  <label className="block text-gray-300 mb-2">Energy Level: {energyLevel}/10</label>
+                  <label className="block text-gray-300 mb-2 text-sm">Energy Level: {energyLevel}/10</label>
                   <input
                     type="range"
                     min="1"
@@ -217,7 +217,7 @@ export function MoodTracker({ onNavigate }: { onNavigate: (view: string) => void
                 </div>
 
                 <div>
-                  <label className="block text-gray-300 mb-2">Stress Level: {stressLevel}/10</label>
+                  <label className="block text-gray-300 mb-2 text-sm">Stress Level: {stressLevel}/10</label>
                   <input
                     type="range"
                     min="1"
@@ -229,38 +229,38 @@ export function MoodTracker({ onNavigate }: { onNavigate: (view: string) => void
                 </div>
 
                 <div>
-                  <label className="block text-gray-300 mb-2">Notes (optional)</label>
+                  <label className="block text-gray-300 mb-2 text-sm">Notes (optional)</label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors"
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors text-sm sm:text-base"
                     rows={3}
                     placeholder="What's on your mind?"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-gray-300 mb-2">Triggers (comma-separated)</label>
+                  <label className="block text-gray-300 mb-2 text-sm">Triggers (comma-separated)</label>
                   <input
                     type="text"
                     value={triggers}
                     onChange={(e) => setTriggers(e.target.value)}
-                    className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors"
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors text-sm sm:text-base"
                     placeholder="work, social, sleep, etc."
                   />
                 </div>
 
-                <div className="flex space-x-4">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                   <button
                     onClick={handleSubmit}
                     disabled={!selectedMood}
-                    className="flex-1 bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-xl py-3 font-bold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:flex-1 bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-xl py-3 font-bold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Save Mood Entry
                   </button>
                   <button
                     onClick={() => setShowForm(false)}
-                    className="px-6 bg-gray-700 text-white rounded-xl py-3 font-bold hover:bg-gray-600 transition-all duration-300"
+                    className="w-full sm:w-auto px-6 bg-gray-700 text-white rounded-xl py-3 font-bold hover:bg-gray-600 transition-all duration-300"
                   >
                     Cancel
                   </button>
@@ -269,20 +269,20 @@ export function MoodTracker({ onNavigate }: { onNavigate: (view: string) => void
             </motion.div>
           )}
 
-          <div className="mt-12">
-            <h3 className="text-2xl font-bold text-white mb-6">Recent Entries</h3>
+          <div className="mt-8 sm:mt-12">
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Recent Entries</h3>
             <div className="space-y-4">
               {moodHistory.slice(0, 5).map((entry) => (
                 <Card3D key={entry.id}>
                   <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-xl p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
+                    <div className="flex flex-col sm:flex-row items-center justify-between">
+                      <div className="flex items-center space-x-4 mb-4 sm:mb-0">
                         <div className="text-3xl">
                           {MOOD_OPTIONS.find((m) => m.label === entry.mood_label)?.emoji || '😐'}
                         </div>
                         <div>
                           <p className="text-white font-bold">{entry.mood_label}</p>
-                          <p className="text-gray-400 text-sm">
+                          <p className="text-gray-400 text-xs sm:text-sm">
                             {new Date(entry.created_at).toLocaleDateString()} at{' '}
                             {new Date(entry.created_at).toLocaleTimeString([], {
                               hour: '2-digit',
@@ -298,7 +298,7 @@ export function MoodTracker({ onNavigate }: { onNavigate: (view: string) => void
                       </div>
                     </div>
                     {entry.notes && (
-                      <p className="text-gray-300 mt-3 text-sm">{entry.notes}</p>
+                      <p className="text-gray-300 mt-3 text-sm italic">{entry.notes}</p>
                     )}
                     {entry.triggers.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">

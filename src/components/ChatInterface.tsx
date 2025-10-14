@@ -167,9 +167,9 @@ export function ChatInterface({ onNavigate }: { onNavigate: (view: string) => vo
 
   return (
     <div className="h-full flex flex-col relative">
-      <button onClick={() => onNavigate('home')} className="absolute top-6 left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2">
+      <button onClick={() => onNavigate('home')} className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2">
         <ArrowLeft className="w-5 h-5" />
-        <span>Back to Home</span>
+        <span className="hidden sm:inline">Back to Home</span>
       </button>
       <div className="absolute inset-0 z-0 opacity-30">
         <Canvas>
@@ -183,31 +183,31 @@ export function ChatInterface({ onNavigate }: { onNavigate: (view: string) => vo
       </div>
 
       <div className="relative z-10 flex flex-col h-full pt-16">
-        <div className="bg-gray-900/80 backdrop-blur-xl border-b border-gray-700/50 p-6">
-          <h2 className="text-2xl font-bold text-white">Your Companion</h2>
-          <p className="text-gray-400 text-sm">Safe, confidential, always here for you</p>
+        <div className="bg-gray-900/80 backdrop-blur-xl border-b border-gray-700/50 p-4 sm:p-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Your Companion</h2>
+          <p className="text-gray-400 text-xs sm:text-sm">Safe, confidential, always here for you</p>
         </div>
 
         {showCrisisWarning && (
           <motion.div
-            className="mx-6 mt-6 bg-red-500/20 border border-red-500/50 rounded-xl p-4"
+            className="mx-4 sm:mx-6 mt-4 sm:mt-6 bg-red-500/20 border border-red-500/50 rounded-xl p-3 sm:p-4"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="flex items-start space-x-3">
-              <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-1" />
+              <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 flex-shrink-0 mt-1" />
               <div>
-                <h3 className="text-red-400 font-bold mb-2">Crisis Support Resources</h3>
-                <p className="text-gray-300 text-sm mb-2">
+                <h3 className="text-red-400 font-bold mb-2 text-sm sm:text-base">Crisis Support Resources</h3>
+                <p className="text-gray-300 text-xs sm:text-sm mb-2">
                   I'm really sorry you're feeling this way. You're not alone. Please reach out for immediate help:
                 </p>
-                <div className="space-y-2 text-sm text-gray-300">
+                <div className="space-y-2 text-xs sm:text-sm text-gray-300">
                   <div>
                     <p className="font-semibold text-gray-200">United States</p>
                     <p><strong>Call 988</strong> - National Suicide Prevention Lifeline</p>
                     <p><strong>Text HOME to 741741</strong> - Crisis Text Line</p>
                   </div>
-                  <div>
+                  <div className="mt-2">
                     <p className="font-semibold text-gray-200">India</p>
                     <p><strong>AASRA:</strong> 91-9820466726 or 9152987821</p>
                     <p><strong>Vandrevala Foundation:</strong> 1860-2662-345</p>
@@ -224,7 +224,7 @@ export function ChatInterface({ onNavigate }: { onNavigate: (view: string) => vo
           </motion.div>
         )}
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           {messages.map((message, index) => (
             <motion.div
               key={index}
@@ -234,13 +234,13 @@ export function ChatInterface({ onNavigate }: { onNavigate: (view: string) => vo
               transition={{ duration: 0.3 }}
             >
               <div
-                className={`max-w-lg px-4 py-3 rounded-2xl ${
+                className={`max-w-xs sm:max-w-md lg:max-w-lg px-4 py-3 rounded-2xl ${
                   message.role === 'user'
                     ? 'bg-teal-500 text-white'
                     : 'bg-gray-800/90 backdrop-blur-xl text-gray-100 border border-gray-700/50'
                 }`}
               >
-                <p className="whitespace-pre-wrap">{message.content}</p>
+                <p className="whitespace-pre-wrap text-sm sm:text-base">{message.content}</p>
                 <p className="text-xs mt-1 opacity-60">
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
@@ -265,20 +265,20 @@ export function ChatInterface({ onNavigate }: { onNavigate: (view: string) => vo
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="bg-gray-900/80 backdrop-blur-xl border-t border-gray-700/50 p-6">
-          <div className="flex space-x-4">
+        <div className="bg-gray-900/80 backdrop-blur-xl border-t border-gray-700/50 p-4 sm:p-6">
+          <div className="flex space-x-2 sm:space-x-4">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Share your thoughts and feelings..."
-              className="flex-1 bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors resize-none"
-              rows={3}
+              placeholder="Share your thoughts..."
+              className="flex-1 bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors resize-none text-sm sm:text-base"
+              rows={2}
             />
             <button
               onClick={handleListen}
-              className={`bg-gray-700 text-white rounded-xl px-4 py-3 font-bold hover:bg-gray-600 transition-all duration-300 flex items-center justify-center ${
-                isListening ? 'bg-red-500 hover:bg-red-600' : ''
+              className={`bg-gray-700 text-white rounded-xl p-3 sm:px-4 transition-all duration-300 flex items-center justify-center ${
+                isListening ? 'bg-red-500 hover:bg-red-600' : 'hover:bg-gray-600'
               } ${isSpeaking ? 'animate-pulse' : ''}`}
             >
               <Mic className="w-5 h-5" />
@@ -286,7 +286,7 @@ export function ChatInterface({ onNavigate }: { onNavigate: (view: string) => vo
             <button
               onClick={handleSend}
               disabled={!input.trim() || loading}
-              className="bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-xl px-6 py-3 font-bold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-xl px-4 sm:px-6 py-3 font-bold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               <Send className="w-5 h-5" />
             </button>

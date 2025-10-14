@@ -237,66 +237,66 @@ export function Meditation({ onNavigate }: { onNavigate: (view: string) => void;
         <>
           <button
             onClick={() => { handleReset(true); }}
-            className="absolute top-6 left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2"
+            className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>Back to Menu</span>
+            <span className="hidden sm:inline">Back to Menu</span>
           </button>
-          <div className="w-full h-full flex flex-col items-center p-8 overflow-y-auto">
+          <div className="w-full h-full flex flex-col items-center p-4 sm:p-8 overflow-y-auto">
             <motion.div
-              className="text-center max-w-2xl w-full pt-20"
+              className="text-center max-w-2xl w-full pt-12 sm:pt-20"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              <h3 className="text-3xl font-bold text-white mb-4">{selectedType.name}</h3>
+              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">{selectedType.name}</h3>
 
-              <div className="relative w-64 h-64 mx-auto mb-8">
-                <svg className="transform -rotate-90 w-64 h-64">
-                  <circle cx="128" cy="128" r="120" stroke="rgba(255,255,255,0.1)" strokeWidth="8" fill="none" />
+              <div className="relative w-48 h-48 sm:w-64 sm:h-64 mx-auto mb-6 sm:mb-8">
+                <svg className="transform -rotate-90 w-full h-full">
+                  <circle cx="50%" cy="50%" r="calc(50% - 8px)" stroke="rgba(255,255,255,0.1)" strokeWidth="8" fill="none" />
                   <circle
-                    cx="128"
-                    cy="128"
-                    r="120"
+                    cx="50%"
+                    cy="50%"
+                    r="calc(50% - 8px)"
                     stroke={selectedType.color}
                     strokeWidth="8"
                     fill="none"
-                    strokeDasharray={`${2 * Math.PI * 120}`}
-                    strokeDashoffset={`${2 * Math.PI * 120 * (1 - progress / 100)}`}
+                    strokeDasharray={`${2 * Math.PI * (window.innerWidth < 640 ? 88 : 120)}`}
+                    strokeDashoffset={`${2 * Math.PI * (window.innerWidth < 640 ? 88 : 120) * (1 - progress / 100)}`}
                     strokeLinecap="round"
                     className="transition-all duration-1000"
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-5xl font-bold text-white">{formatTime(timeRemaining)}</div>
+                  <div className="text-4xl sm:text-5xl font-bold text-white">{formatTime(timeRemaining)}</div>
                 </div>
               </div>
 
-              <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 mb-8 max-h-48 overflow-y-auto">
-                <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{script}</p>
+              <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 max-h-32 sm:max-h-48 overflow-y-auto">
+                <p className="text-gray-300 leading-relaxed whitespace-pre-wrap text-sm sm:text-base">{script}</p>
               </div>
 
               <div className="flex items-center justify-center space-x-4">
                 <motion.button
                   onClick={() => setIsActive(!isActive)}
-                  className="bg-teal-500 text-white rounded-full p-6 hover:bg-teal-600 transition-colors"
+                  className="bg-teal-500 text-white rounded-full p-4 sm:p-6 hover:bg-teal-600 transition-colors"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  {isActive ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8" />}
+                  {isActive ? <Pause className="w-6 h-6 sm:w-8 sm:h-8" /> : <Play className="w-6 h-6 sm:w-8 sm:h-8" />}
                 </motion.button>
                 <motion.button
                   onClick={() => handleReset()}
-                  className="bg-gray-700 text-white rounded-full p-6 hover:bg-gray-600 transition-colors"
+                  className="bg-gray-700 text-white rounded-full p-4 sm:p-6 hover:bg-gray-600 transition-colors"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <RotateCcw className="w-8 h-8" />
+                  <RotateCcw className="w-6 h-6 sm:w-8 sm:h-8" />
                 </motion.button>
               </div>
 
-              <div className="mt-8 flex items-center justify-center space-x-3 bg-gray-800/50 border border-teal-500/20 rounded-full px-4 py-2">
+              <div className="mt-6 sm:mt-8 flex items-center justify-center space-x-3 bg-gray-800/50 border border-teal-500/20 rounded-full px-4 py-2">
                 <Volume2 className="w-5 h-5 text-teal-400" />
-                <p className="text-sm text-teal-200 font-medium">Plug in headphones for best experience</p>
+                <p className="text-xs sm:text-sm text-teal-200 font-medium">Plug in headphones for best experience</p>
               </div>
             </motion.div>
           </div>
@@ -305,30 +305,30 @@ export function Meditation({ onNavigate }: { onNavigate: (view: string) => void;
     }
 
     return (
-      <div className="flex-1 flex items-center justify-center p-8 relative">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 relative">
         <button
           onClick={() => onNavigate('home')}
-          className="absolute top-6 left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2"
+          className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Back to Home</span>
+          <span className="hidden sm:inline">Back to Home</span>
         </button>
         <div className="max-w-4xl w-full">
           <motion.h2
-            className="text-4xl font-bold text-white text-center mb-4"
+            className="text-2xl sm:text-4xl font-bold text-white text-center mb-2 sm:mb-4"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
             Guided Meditation
           </motion.h2>
-          <p className="text-gray-300 text-center mb-8">Find peace and calm your mind with AI-guided meditation</p>
+          <p className="text-gray-300 text-center text-sm sm:text-base mb-6 sm:mb-8">Find peace and calm your mind with AI-guided meditation</p>
 
-          <div className="flex items-center justify-center space-x-3 bg-gray-800/50 border border-teal-500/20 rounded-full px-4 py-2 mb-8 max-w-md mx-auto">
+          <div className="hidden sm:flex items-center justify-center space-x-3 bg-gray-800/50 border border-teal-500/20 rounded-full px-4 py-2 mb-8 max-w-md mx-auto">
             <Volume2 className="w-5 h-5 text-teal-400" />
             <p className="text-sm text-teal-200 font-medium">Plug in headphones for best experience</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
             {MEDITATION_TYPES.map((type) => (
               <motion.button
                 key={type.id}
@@ -336,7 +336,7 @@ export function Meditation({ onNavigate }: { onNavigate: (view: string) => void;
                   setSelectedType(type);
                   setScript('');
                 }}
-                className={`bg-gray-800/80 backdrop-blur-xl border-2 rounded-2xl p-6 text-left transition-all duration-300 ${
+                className={`bg-gray-800/80 backdrop-blur-xl border-2 rounded-2xl p-4 sm:p-6 text-left transition-all duration-300 ${
                   selectedType.id === type.id
                     ? 'border-teal-500 bg-teal-500/20'
                     : 'border-gray-700/50 hover:border-gray-600'
@@ -344,8 +344,8 @@ export function Meditation({ onNavigate }: { onNavigate: (view: string) => void;
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <h3 className="text-xl font-bold text-white mb-2">{type.name}</h3>
-                <p className="text-gray-400 mb-3">{type.description}</p>
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2">{type.name}</h3>
+                <p className="text-gray-400 text-sm sm:text-base mb-3">{type.description}</p>
               </motion.button>
             ))}
           </div>
@@ -354,7 +354,7 @@ export function Meditation({ onNavigate }: { onNavigate: (view: string) => void;
             <motion.button
               onClick={handleStart}
               disabled={loading}
-              className="bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-full px-12 py-4 font-bold text-lg hover:shadow-2xl transition-all duration-300 disabled:opacity-50 inline-flex items-center space-x-3"
+              className="bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-full px-8 sm:px-12 py-3 sm:py-4 font-bold text-base sm:text-lg hover:shadow-2xl transition-all duration-300 disabled:opacity-50 inline-flex items-center space-x-3"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -401,15 +401,15 @@ function MoodCheck({
 
   return (
     <motion.div
-      className="flex-1 flex items-center justify-center p-8"
+      className="flex-1 flex items-center justify-center p-4 sm:p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      <div className="bg-gray-800/90 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 max-w-md w-full">
-        <h3 className="text-2xl font-bold text-white text-center mb-4">
+      <div className="bg-gray-800/90 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 sm:p-8 max-w-md w-full">
+        <h3 className="text-xl sm:text-2xl font-bold text-white text-center mb-4">
           {type === 'before' ? 'How do you feel right now?' : 'How do you feel after the session?'}
         </h3>
-        <p className="text-gray-400 text-center mb-8">
+        <p className="text-gray-400 text-center text-sm sm:text-base mb-6 sm:mb-8">
           Rate your mood on a scale of 1-10
         </p>
 
@@ -428,20 +428,20 @@ function MoodCheck({
             className="w-full"
           />
           <div className="text-center mt-4">
-            <span className="text-4xl font-bold text-white">{selectedMood}/10</span>
+            <span className="text-3xl sm:text-4xl font-bold text-white">{selectedMood}/10</span>
           </div>
         </div>
 
-        <div className="flex space-x-4">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
           <button
             onClick={() => onSubmit(selectedMood)}
-            className="flex-1 bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-xl py-3 font-bold hover:shadow-lg transition-all duration-300"
+            className="w-full sm:flex-1 bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-xl py-3 font-bold hover:shadow-lg transition-all duration-300"
           >
             Continue
           </button>
           <button
             onClick={onCancel}
-            className="px-6 bg-gray-700 text-white rounded-xl py-3 font-bold hover:bg-gray-600 transition-all duration-300"
+            className="w-full sm:w-auto px-6 bg-gray-700 text-white rounded-xl py-3 font-bold hover:bg-gray-600 transition-all duration-300"
           >
             Cancel
           </button>
@@ -456,26 +456,26 @@ function DurationPicker({ onSelect, onCancel }: { onSelect: (duration: number) =
 
   return (
     <motion.div
-      className="flex-1 flex items-center justify-center p-8"
+      className="flex-1 flex items-center justify-center p-4 sm:p-8"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
     >
-      <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 max-w-lg w-full">
-        <h3 className="text-3xl font-bold text-white text-center mb-8">
+      <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 sm:p-8 max-w-lg w-full">
+        <h3 className="text-2xl sm:text-3xl font-bold text-white text-center mb-6 sm:mb-8">
           Choose a duration
         </h3>
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8">
           {durations.map(duration => (
             <motion.button
               key={duration}
               onClick={() => onSelect(duration)}
-              className="bg-gray-900/50 border-2 border-gray-700 rounded-xl p-6 text-white text-3xl font-bold hover:border-teal-500 hover:bg-teal-500/10 transition-all duration-300 flex flex-col items-center justify-center"
+              className="bg-gray-900/50 border-2 border-gray-700 rounded-xl p-4 sm:p-6 text-white text-2xl sm:text-3xl font-bold hover:border-teal-500 hover:bg-teal-500/10 transition-all duration-300 flex flex-col items-center justify-center"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               {duration}
-              <span className="text-lg font-medium mt-1">min</span>
+              <span className="text-base sm:text-lg font-medium mt-1">min</span>
             </motion.button>
           ))}
         </div>

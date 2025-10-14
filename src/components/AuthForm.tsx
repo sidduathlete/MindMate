@@ -52,7 +52,7 @@ export function AuthForm({ onSuccess, onBack }: AuthFormProps) {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-teal-900 flex items-center justify-center p-6 overflow-hidden">
+    <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-teal-900 flex items-center justify-center p-4 sm:p-6 overflow-hidden">
       <div className="absolute inset-0 z-0">
         <Canvas>
           <PerspectiveCamera makeDefault position={[0, 0, 5]} />
@@ -72,25 +72,25 @@ export function AuthForm({ onSuccess, onBack }: AuthFormProps) {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="bg-gray-800/90 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-teal-500/20">
+        <div className="bg-gray-800/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-2xl border border-teal-500/20">
           <button
             onClick={onBack}
-            className="text-gray-400 hover:text-white mb-6 transition-colors"
+            className="text-gray-400 hover:text-white mb-4 sm:mb-6 transition-colors text-sm sm:text-base"
           >
             ← Back
           </button>
 
-          <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center justify-center mb-6 sm:mb-8">
             <BrainIcon />
-            <h1 className="text-3xl font-bold text-white ml-3">MindMate</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white ml-3">MindMate</h1>
           </div>
 
-          <h2 className="text-2xl font-bold text-white text-center mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white text-center mb-6">
             {isSignUp ? 'Create Your Safe Space' : 'Welcome Back'}
           </h2>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-xl mb-4">
+            <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-xl mb-4 text-sm">
               {error}
             </div>
           )}
@@ -105,7 +105,7 @@ export function AuthForm({ onSuccess, onBack }: AuthFormProps) {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full bg-gray-700/50 border border-gray-600 rounded-xl px-12 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors"
+                    className="w-full bg-gray-700/50 border border-gray-600 rounded-xl pl-10 pr-4 sm:pl-12 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors"
                     placeholder="Choose a username"
                     required={isSignUp}
                   />
@@ -121,7 +121,7 @@ export function AuthForm({ onSuccess, onBack }: AuthFormProps) {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-gray-700/50 border border-gray-600 rounded-xl px-12 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors"
+                  className="w-full bg-gray-700/50 border border-gray-600 rounded-xl pl-10 pr-4 sm:pl-12 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors"
                   placeholder="your@email.com"
                   required
                 />
@@ -136,7 +136,7 @@ export function AuthForm({ onSuccess, onBack }: AuthFormProps) {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-gray-700/50 border border-gray-600 rounded-xl px-12 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors"
+                  className="w-full bg-gray-700/50 border border-gray-600 rounded-xl pl-10 pr-4 sm:pl-12 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-teal-500 transition-colors"
                   placeholder="••••••••"
                   required
                   minLength={6}
@@ -156,7 +156,7 @@ export function AuthForm({ onSuccess, onBack }: AuthFormProps) {
           <div className="mt-6 text-center">
             <button
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-teal-400 hover:text-teal-300 transition-colors"
+              className="text-teal-400 hover:text-teal-300 transition-colors text-sm"
             >
               {isSignUp
                 ? 'Already have an account? Sign in'

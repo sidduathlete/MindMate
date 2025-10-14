@@ -66,8 +66,9 @@ export function Dashboard() {
           </Canvas>
         </div>
       )}
+      {/* Desktop Sidebar */}
       <motion.aside
-        className="relative z-10 bg-gray-900/50 backdrop-blur-xl border-r border-gray-700/50 flex flex-col py-6 space-y-6 overflow-hidden"
+        className="relative z-10 bg-gray-900/50 backdrop-blur-xl border-r border-gray-700/50 hidden lg:flex flex-col py-6 space-y-6 overflow-hidden"
         initial={{ x: -256, opacity: 0 }}
         animate={{ x: 0, opacity: 1, width: isSidebarExpanded ? '16rem' : '5rem' }}
         transition={{ type: 'spring', stiffness: 200, damping: 25 }}
@@ -170,11 +171,12 @@ export function Dashboard() {
         </div>
       </motion.aside>
 
-      <main className="relative z-10 flex-1 overflow-hidden">
+      <main className="relative z-10 flex-1 overflow-hidden pb-20 lg:pb-0">
         <div className="absolute top-6 right-6 z-20">
+          {/* Desktop Profile Button */}
           <motion.button 
             onClick={() => setCurrentView('profile')} 
-            className="relative w-12 h-12 bg-gray-800/70 backdrop-blur-xl border border-gray-700/50 rounded-full flex items-center justify-center text-gray-300 hover:text-white hover:border-teal-500 transition-all"
+            className="relative w-12 h-12 bg-gray-800/70 backdrop-blur-xl border border-gray-700/50 rounded-full hidden lg:flex items-center justify-center text-gray-300 hover:text-white hover:border-teal-500 transition-all"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -192,6 +194,15 @@ export function Dashboard() {
               }}
             />
           </motion.button>
+          {/* Mobile Profile Button */}
+          <motion.button 
+            onClick={() => setCurrentView('profile')} 
+            className="relative w-10 h-10 bg-gray-800/70 backdrop-blur-xl border border-gray-700/50 rounded-full flex lg:hidden items-center justify-center text-gray-300 hover:text-white hover:border-teal-500 transition-all"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <User className="w-5 h-5" />
+          </motion.button>
         </div>
 
         <AnimatePresence mode="wait">
@@ -202,7 +213,7 @@ export function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="h-full overflow-auto p-8"
+              className="h-full overflow-auto p-4 sm:p-6 lg:p-8 pt-20"
             >
               <HomeView user={user} onNavigate={setCurrentView} />
             </motion.div>
@@ -264,11 +275,27 @@ export function Dashboard() {
               transition={{ duration: 0.3 }}
               className="h-full"
             >
-              <Profile user={user} journalCount={journalCount} setUser={setUser} onNavigate={setCurrentView} />
+              <Profile user={user} journalCount={journalCount} setUser={setUser} onNavigate={setCurrentView} handleSignOut={handleSignOut} />
             </motion.div>
           )}
         </AnimatePresence>
       </main>
+
+      {/* Mobile Bottom Nav */}
+      <div className="fixed bottom-0 left-0 right-0 bg-gray-900/80 backdrop-blur-xl border-t border-gray-700/50 p-2 flex justify-around items-center lg:hidden z-20">
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setCurrentView(item.id)}
+            className={`flex flex-col items-center justify-center text-xs w-16 h-14 rounded-lg transition-all duration-300 ${
+              currentView === item.id ? 'text-teal-400' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <item.icon className="w-6 h-6 mb-1" />
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -279,83 +306,83 @@ function HomeView({ user, onNavigate }: { user: any, onNavigate: (view: View) =>
   return (
     <div className="max-w-6xl mx-auto">
       <motion.h1
-        className="text-4xl font-bold text-white mb-2"
+        className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
         Welcome to Your Safe Space, {displayName}
       </motion.h1>
-      <p className="text-gray-400 mb-12">How are you feeling today?</p>
+      <p className="text-gray-400 mb-8 sm:mb-12">How are you feeling today?</p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <motion.button
           onClick={() => onNavigate('chat')}
-          className="bg-gray-800/70 backdrop-blur-xl border border-teal-500/30 rounded-2xl p-8 text-left hover:border-teal-400/60 hover:shadow-xl hover:shadow-teal-500/20 transition-all duration-300 group"
+          className="bg-gray-800/70 backdrop-blur-xl border border-teal-500/30 rounded-2xl p-6 sm:p-8 text-left hover:border-teal-400/60 hover:shadow-xl hover:shadow-teal-500/20 transition-all duration-300 group"
           whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.98 }}
         >
           <div className="relative">
             <div className="absolute inset-0 bg-teal-400/10 rounded-full blur-xl group-hover:bg-teal-400/20 transition-all"></div>
-            <MessageCircle className="relative w-14 h-14 text-teal-400 mb-4 group-hover:scale-110 transition-transform" />
+            <MessageCircle className="relative w-10 h-10 sm:w-12 sm:h-12 text-teal-400 mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
           </div>
-          <h3 className="text-2xl font-bold text-white mb-2">Talk to Your Companion</h3>
-          <p className="text-gray-300">Share your thoughts and feelings in a judgment-free space.</p>
+          <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Talk to Your Companion</h3>
+          <p className="text-gray-300 text-sm sm:text-base">Share your thoughts and feelings in a judgment-free space.</p>
         </motion.button>
 
         <motion.button
           onClick={() => onNavigate('mood')}
-          className="bg-gray-800/70 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-8 text-left hover:border-cyan-400/60 hover:shadow-xl hover:shadow-cyan-500/20 transition-all duration-300 group"
+          className="bg-gray-800/70 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-6 sm:p-8 text-left hover:border-cyan-400/60 hover:shadow-xl hover:shadow-cyan-500/20 transition-all duration-300 group"
           whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.98 }}
         >
           <div className="relative">
             <div className="absolute inset-0 bg-cyan-400/10 rounded-full blur-xl group-hover:bg-cyan-400/20 transition-all"></div>
-            <Heart className="relative w-14 h-14 text-cyan-400 mb-4 group-hover:scale-110 transition-transform" />
+            <Heart className="relative w-10 h-10 sm:w-12 sm:h-12 text-cyan-400 mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
           </div>
-          <h3 className="text-2xl font-bold text-white mb-2">Track Your Mood</h3>
-          <p className="text-gray-300">Visualize your emotional journey with interactive insights.</p>
+          <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Track Your Mood</h3>
+          <p className="text-gray-300 text-sm sm:text-base">Visualize your emotional journey with interactive insights.</p>
         </motion.button>
 
         <motion.button
           onClick={() => onNavigate('meditation')}
-          className="bg-gray-800/70 backdrop-blur-xl border border-teal-600/30 rounded-2xl p-8 text-left hover:border-teal-500/60 hover:shadow-xl hover:shadow-teal-600/20 transition-all duration-300 group"
+          className="bg-gray-800/70 backdrop-blur-xl border border-teal-600/30 rounded-2xl p-6 sm:p-8 text-left hover:border-teal-500/60 hover:shadow-xl hover:shadow-teal-600/20 transition-all duration-300 group"
           whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.98 }}
         >
           <div className="relative">
             <div className="absolute inset-0 bg-teal-400/10 rounded-full blur-xl group-hover:bg-teal-400/20 transition-all"></div>
-            <Brain className="relative w-14 h-14 text-teal-500 mb-4 group-hover:scale-110 transition-transform" />
+            <Brain className="relative w-10 h-10 sm:w-12 sm:h-12 text-teal-500 mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
           </div>
-          <h3 className="text-2xl font-bold text-white mb-2">Guided Meditation</h3>
-          <p className="text-gray-300">Find peace with AI-powered meditation sessions.</p>
+          <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Guided Meditation</h3>
+          <p className="text-gray-300 text-sm sm:text-base">Find peace with AI-powered meditation sessions.</p>
         </motion.button>
 
         <motion.button
           onClick={() => onNavigate('journal')}
-          className="bg-gray-800/70 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-8 text-left hover:border-emerald-400/60 hover:shadow-xl hover:shadow-emerald-500/20 transition-all duration-300 group"
+          className="bg-gray-800/70 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-6 sm:p-8 text-left hover:border-emerald-400/60 hover:shadow-xl hover:shadow-emerald-500/20 transition-all duration-300 group"
           whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.98 }}
         >
           <div className="relative">
             <div className="absolute inset-0 bg-emerald-400/10 rounded-full blur-xl group-hover:bg-emerald-400/20 transition-all"></div>
-            <BookOpen className="relative w-14 h-14 text-emerald-400 mb-4 group-hover:scale-110 transition-transform" />
+            <BookOpen className="relative w-10 h-10 sm:w-12 sm:h-12 text-emerald-400 mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
           </div>
-          <h3 className="text-2xl font-bold text-white mb-2">Daily Journal</h3>
-          <p className="text-gray-300">Reflect and process your thoughts through writing.</p>
+          <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Daily Journal</h3>
+          <p className="text-gray-300 text-sm sm:text-base">Reflect and process your thoughts through writing.</p>
         </motion.button>
       </div>
 
       <motion.div
-        className="mt-12 bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/30 rounded-2xl p-6"
+        className="mt-8 sm:mt-12 bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/30 rounded-2xl p-4 sm:p-6"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        <h3 className="text-lg font-bold text-red-400 mb-2">Crisis Support Available</h3>
-        <p className="text-gray-300 mb-3">
+        <h3 className="text-base sm:text-lg font-bold text-red-400 mb-2">Crisis Support Available</h3>
+        <p className="text-gray-300 mb-3 text-sm sm:text-base">
           If you're in crisis or having thoughts of self-harm, please reach out for immediate help:
         </p>
-        <div className="space-y-2 text-sm">
+        <div className="space-y-2 text-xs sm:text-sm">
           <p className="text-gray-300">
             <span className="font-bold">National Suicide Prevention Lifeline:</span> 988
           </p>

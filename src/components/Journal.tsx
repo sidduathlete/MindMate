@@ -103,96 +103,96 @@ export function Journal({ onNavigate }: { onNavigate: (view: string) => void }) 
 
   return (
     <div className="h-full overflow-auto p-8 bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 relative">
-      <button onClick={() => onNavigate('home')} className="absolute top-6 left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2">
+      <button onClick={() => onNavigate('home')} className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 text-gray-400 hover:text-white transition-colors flex items-center space-x-2">
         <ArrowLeft className="w-5 h-5" />
-        <span>Back to Home</span>
+        <span className="hidden sm:inline">Back to Home</span>
       </button>
-      <div className="max-w-4xl mx-auto pt-16">
-        <div className="flex items-center justify-between mb-8">
+      <div className="max-w-4xl mx-auto pt-12 sm:pt-16">
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-white mb-2">Daily Journal</h2>
-            <p className="text-gray-400">Reflect on your thoughts and feelings</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Daily Journal</h2>
+            <p className="text-gray-400 text-sm sm:text-base">Reflect on your thoughts and feelings</p>
           </div>
           {!showForm && (
             <motion.button
               onClick={() => setShowForm(true)}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl px-6 py-3 font-bold flex items-center space-x-2 hover:shadow-lg transition-all duration-300"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full sm:rounded-xl px-4 py-4 sm:px-6 sm:py-3 font-bold flex items-center space-x-2 hover:shadow-lg transition-all duration-300"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <Plus className="w-5 h-5" />
-              <span>New Entry</span>
+              <span className="hidden sm:inline">New Entry</span>
             </motion.button>
           )}
         </div>
 
         {showForm && (
           <motion.div
-            className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 mb-8"
+            className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-4 sm:p-8 mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <h3 className="text-2xl font-bold text-white mb-6">
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">
               {editingEntry ? 'Edit Entry' : 'New Journal Entry'}
             </h3>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div>
-                <label className="block text-gray-300 mb-2">Title (optional)</label>
+                <label className="block text-gray-300 mb-2 text-sm">Title (optional)</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors text-sm sm:text-base"
                   placeholder="Give your entry a title..."
                 />
               </div>
 
               <div>
-                <label className="block text-gray-300 mb-2">How are you feeling?</label>
+                <label className="block text-gray-300 mb-2 text-sm">How are you feeling?</label>
                 <input
                   type="text"
                   value={moodAtTime}
                   onChange={(e) => setMoodAtTime(e.target.value)}
-                  className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors text-sm sm:text-base"
                   placeholder="Describe your current mood..."
                 />
               </div>
 
               <div>
-                <label className="block text-gray-300 mb-2">Your Thoughts</label>
+                <label className="block text-gray-300 mb-2 text-sm">Your Thoughts</label>
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors"
-                  rows={8}
+                  className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors text-sm sm:text-base"
+                  rows={6}
                   placeholder="Write freely... what's on your mind?"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-gray-300 mb-2">Gratitude List (comma-separated)</label>
+                <label className="block text-gray-300 mb-2 text-sm">Gratitude List (comma-separated)</label>
                 <input
                   type="text"
                   value={gratitude}
                   onChange={(e) => setGratitude(e.target.value)}
-                  className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition-colors text-sm sm:text-base"
                   placeholder="What are you grateful for today?"
                 />
               </div>
 
-              <div className="flex space-x-4">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                 <button
                   onClick={handleSubmit}
                   disabled={!content.trim()}
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl py-3 font-bold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl py-3 font-bold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {editingEntry ? 'Update Entry' : 'Save Entry'}
                 </button>
                 <button
                   onClick={resetForm}
-                  className="px-6 bg-gray-700 text-white rounded-xl py-3 font-bold hover:bg-gray-600 transition-all duration-300"
+                  className="w-full sm:w-auto px-6 bg-gray-700 text-white rounded-xl py-3 font-bold hover:bg-gray-600 transition-all duration-300"
                 >
                   Cancel
                 </button>
@@ -201,13 +201,13 @@ export function Journal({ onNavigate }: { onNavigate: (view: string) => void }) 
           </motion.div>
         )}
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {entries.length === 0 ? (
             <Card3D>
-              <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-12 text-center">
-                <BookOpen className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">Start Your Journey</h3>
-                <p className="text-gray-400">
+              <div className="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 sm:p-12 text-center">
+                <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 text-purple-400 mx-auto mb-4" />
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Start Your Journey</h3>
+                <p className="text-gray-400 text-sm sm:text-base">
                   Begin journaling to reflect on your thoughts and track your emotional growth.
                 </p>
               </div>
@@ -215,13 +215,13 @@ export function Journal({ onNavigate }: { onNavigate: (view: string) => void }) 
           ) : (
             entries.map((entry) => (
               <Card3D key={entry.id} glowColor="rgba(168, 85, 247, 0.4)">
-                <div className="bg-gray-800/80 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-6">
+                <div className="bg-gray-800/80 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-4 sm:p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       {entry.title && (
-                        <h3 className="text-xl font-bold text-white mb-2">{entry.title}</h3>
+                        <h3 className="text-lg sm:text-xl font-bold text-white mb-2">{entry.title}</h3>
                       )}
-                      <div className="flex items-center space-x-4 text-sm text-gray-400">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-sm text-gray-400">
                         <span>
                           {new Date(entry.created_at).toLocaleDateString('en-US', {
                             weekday: 'long',
@@ -231,13 +231,13 @@ export function Journal({ onNavigate }: { onNavigate: (view: string) => void }) 
                           })}
                         </span>
                         {entry.mood_at_time && (
-                          <span className="px-2 py-1 bg-purple-500/20 rounded-lg text-purple-300">
+                          <span className="mt-1 sm:mt-0 px-2 py-1 bg-purple-500/20 rounded-lg text-purple-300 text-xs sm:text-sm">
                             {entry.mood_at_time}
                           </span>
                         )}
                       </div>
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 ml-4">
                       <button
                         onClick={() => handleEdit(entry)}
                         className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
@@ -253,7 +253,7 @@ export function Journal({ onNavigate }: { onNavigate: (view: string) => void }) 
                     </div>
                   </div>
 
-                  <p className="text-gray-300 whitespace-pre-wrap mb-4">{entry.content}</p>
+                  <p className="text-gray-300 whitespace-pre-wrap mb-4 text-sm sm:text-base">{entry.content}</p>
 
                   {entry.gratitude_items.length > 0 && (
                     <div className="mt-4 pt-4 border-t border-gray-700">
@@ -262,7 +262,7 @@ export function Journal({ onNavigate }: { onNavigate: (view: string) => void }) 
                         {entry.gratitude_items.map((item, i) => (
                           <span
                             key={i}
-                            className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm"
+                            className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs sm:text-sm"
                           >
                             {item}
                           </span>
