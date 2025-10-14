@@ -8,6 +8,7 @@ export function Profile({ user, journalCount, setUser, onNavigate }: { user: any
   const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState(user?.user_metadata?.username || '');
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleSaveUsername = async () => {
     if (!newUsername.trim()) {
@@ -51,8 +52,27 @@ export function Profile({ user, journalCount, setUser, onNavigate }: { user: any
       // Update the state in the app instantly
       setUser(data.user);
       setIsEditing(false);
+      setSuccessMessage('Username changed successfully!');
+      setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
     }
   };
+
+  if (!user) {
+    return (
+      <div className="h-full flex items-center justify-center text-white">
+        Loading profile...
+      </div>
+    );
+  }
+
+  // Add null check for user at the beginning of the function
+  if (!user) {
+    return (
+      <div className="h-full flex items-center justify-center text-white">
+        Loading profile...
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -99,6 +119,7 @@ export function Profile({ user, journalCount, setUser, onNavigate }: { user: any
                   className="w-full bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-2 text-white text-center text-xl focus:outline-none focus:border-blue-500"
                 />
                 {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
+                {successMessage && <p className="text-green-400 text-sm mt-2">{successMessage}</p>}
                 <div className="flex space-x-2 mt-4">
                   <button onClick={handleSaveUsername} className="flex-1 bg-green-600 text-white rounded-lg py-2 hover:bg-green-700 transition-colors">Save</button>
                   <button onClick={() => setIsEditing(false)} className="flex-1 bg-gray-600 text-white rounded-lg py-2 hover:bg-gray-700 transition-colors">Cancel</button>
