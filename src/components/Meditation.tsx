@@ -103,7 +103,6 @@ export function Meditation({ onNavigate }: { onNavigate: (view: string) => void;
   const handleDurationSelect = (duration: number) => {
     setSelectedDuration(duration);
     setShowDurationPicker(false);
-    setLoading(true);
 
     let prompt = `Generate a ${duration}-minute guided meditation script for a '${selectedType.name}' session.`;
     switch (selectedType.id) {
@@ -146,6 +145,7 @@ export function Meditation({ onNavigate }: { onNavigate: (view: string) => void;
   const handleMoodBeforeSubmit = async (mood: number) => {
     setMoodBefore(mood);
     setShowMoodCheck(null);
+    setLoading(true);
 
     if (scriptPromise) {
       const generatedScript = await scriptPromise;
@@ -213,6 +213,10 @@ export function Meditation({ onNavigate }: { onNavigate: (view: string) => void;
   const progress = ((selectedDuration * 60 - timeRemaining) / (selectedDuration * 60)) * 100;
 
   const renderContent = () => {
+    if (loading) {
+      return <LoadingSpinner />;
+    }
+
     if (showDurationPicker) {
       return <DurationPicker onSelect={handleDurationSelect} onCancel={() => setShowDurationPicker(false)} />;
     }
@@ -384,6 +388,14 @@ export function Meditation({ onNavigate }: { onNavigate: (view: string) => void;
       <div className="relative z-10 h-full flex flex-col">
         {renderContent()}
       </div>
+    </div>
+  );
+}
+
+function LoadingSpinner() {
+  return (
+    <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-30">
+      <div className="w-16 h-16 border-4 border-teal-400 border-t-transparent rounded-full animate-spin"></div>
     </div>
   );
 }
