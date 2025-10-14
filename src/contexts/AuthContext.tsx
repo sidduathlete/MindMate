@@ -42,7 +42,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: null };
     } catch (error) {
       console.error('signUp error:', error);
-      return { error: error as Error };
+      const err = error as Error;
+      if (err.message === 'User already registered') {
+        return { error: new Error('User exists, try to sign-in.') };
+      }
+      return { error: err };
     }
   };
 
