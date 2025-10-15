@@ -43,7 +43,7 @@ https://mindmatesupport.netlify.app/
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/your-username/mindmate.git
+    git clone https://github.com/sidduathlete/MindMate.git
     ```
 2.  Navigate to the project directory:
     ```bash
