@@ -59,7 +59,7 @@ export async function sendMessage(
 🇮🇳 Call AASRA at 91-9820466726 / 9152987821.`;
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const history = [
       { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
@@ -120,7 +120,7 @@ export function analyzeSentiment(message: string): number {
 
 export async function generateAffirmation(mood: string): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const prompt = `Generate a short (under 20 words), personalized affirmation for someone feeling ${mood}. Make it warm and empowering.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
@@ -143,7 +143,7 @@ export async function generateAffirmation(mood: string): Promise<string> {
 
 export async function generateMeditationScript(type: string, duration: number): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const prompt = `Generate a ${duration}-minute ${type} meditation script. The script should have a calm introduction, a section focusing on the breath, and a peaceful conclusion. IMPORTANT: Do not include any conversational text or introduction. The response should start *directly* with the script content. Format the title of the meditation with a '###' prefix, for example: '### 5-Minute Breathing Meditation'.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
