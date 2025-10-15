@@ -2,7 +2,7 @@
 
 MindMate is a mental health companion application designed to provide a safe and supportive space for users to manage their mental well-being. It offers a range of features to help users track their mood, practice mindfulness, and gain insights into their emotional patterns.
 
-##Live Demo:
+## Live Demo:
 https://mindmatesupport.netlify.app/
 
 ## Features
